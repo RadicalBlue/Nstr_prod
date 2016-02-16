@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 
 int main()
