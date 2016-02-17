@@ -9,5 +9,6 @@
 
 #include "liste.h"
 
+void * th_Machine();
 
 #endif
