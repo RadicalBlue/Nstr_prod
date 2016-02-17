@@ -1,3 +1,31 @@
+
+Skip to content
+This repository
+
+    Pull requests
+    Issues
+    Gist
+
+    @RadicalBlue
+
+2
+0
+
+    0
+
+RadicalBlue/Nstr_prod
+Code
+Issues 0
+Pull requests 0
+Wiki
+Pulse
+Graphs
+Settings
+Nstr_prod/main.c
+13e7ee3 3 minutes ago
+@vdd9474a vdd9474a implementation main.c
+1 contributor
+50 lines (37 sloc) 1.07 KB
 #include "superviseur.h"
 #include "robot_retrait.h"
 #include "robot_alimentation.h"

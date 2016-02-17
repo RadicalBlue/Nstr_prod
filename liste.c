@@ -24,3 +24,8 @@ bool isEmpty(Liste l)
   return false;
 }
 
+Liste addInList(Liste l, char * element)
+{
+  Liste newlist = creatList();
+  
+}
