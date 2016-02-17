@@ -7,7 +7,12 @@
 #include <sys/types.h>
 
 
-
+/**************************************************
+ *
+ * Procedure affichant un message mess et
+ * faisant un exit avec le code d'erreur code
+ * 
+ * ************************************************/
 void erreur(char* mess, int code);
 
 #endif

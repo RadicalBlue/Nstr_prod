@@ -1,6 +1,7 @@
 #include "superviseur.h"
 #define NBRMACHINE 3
 
+
 bool machineEnPanne[NBRMACHINE] = false;
 pthread_mutex_t mutexMachine[NBRMACHINE];
 pthread_mutex_t mutexConvoyeur;
