@@ -53,7 +53,12 @@ bool isEmpty(Liste l);
  ******************************************************/
 Liste removeFirst(Liste l);
 
-
+/******************************************************
+ *
+ * Procedure détruisant la liste en paramètre
+ * 
+ ******************************************************/
+void destroyList(Liste l);
 
 
 
