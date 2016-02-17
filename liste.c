@@ -16,3 +16,11 @@ Liste creatList()
     l-> data = NULL;
   }
 }
+
+bool isEmpty(Liste l)
+{
+  if(l->data == NULL && l->next == NULL)
+    return true;
+  return false;
+}
+
