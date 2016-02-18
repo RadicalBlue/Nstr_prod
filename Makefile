@@ -26,8 +26,8 @@ piece.o : piece.c piece.h
 liste.o : liste.c liste.h
 	${CC} ${OPT} -c liste.c
 
-testListe : test.c liste.o
-	${CC} ${OPT} -o testListe test.c -g liste.o
+testListe : test.c liste.o erreur.o
+	${CC} ${OPT} -o testListe test.c -g liste.o erreur.o
 
 
 clean :

@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include "erreur.h"
 
 typedef struct s_liste * Liste;
@@ -61,6 +62,11 @@ Liste removeFirst(Liste l);
  ******************************************************/
 void destroyList(Liste l);
 
-
+/******************************************************
+ *
+ * Procedure affichant la liste en paramètre
+ * 
+ ******************************************************/
+void mapList(Liste l);
 
 #endif

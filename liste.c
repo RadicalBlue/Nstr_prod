@@ -1,7 +1,7 @@
 #include "liste.h"
 
 
-struct s_liste {
+struct s_liste{
   Liste next; /* pointeur sur le reste de la liste */
   pthread_t data;
 };
@@ -9,18 +9,19 @@ struct s_liste {
 
 Liste creatList()
 {
-  Liste l = malloc(sizeof(s_list));
+  Liste l = malloc(sizeof(struct s_liste));
   if (l)
   {
     l->next = NULL;
-    l-> data = NULL;
+    l-> data = 0;
   }
   else erreur(": erreur d'allouement d'espace memoire\n", 99);
+  return l;
 }
 
 bool isEmpty(Liste l)
 {
-  if(l->data == NULL && l->next == NULL)
+  if(l->data == 0 && l->next == NULL)
     return true;
   return false;
 }
@@ -29,12 +30,7 @@ Liste addInList(Liste l, pthread_t element)
 {
   Liste newlist = creatList();
   
-  newlist->next = l;
-  newlist->data = malloc(sizeof(pthread_t));
-  
-  if(newlist->data == NULL)
-    erreur(": erreur d'allouement d'espace memoire\n", 99);
-  
+  newlist->next = l;  
   newlist->data = element;
   return newlist;  
 }
@@ -59,7 +55,7 @@ Liste removeFromList(Liste l, pthread_t element)
 {
   Liste temp = l->next;
   
-  while(temp->data != element && temp->data != NULL)
+  while(temp->data != element && temp->data != 0)
   {
     temp = temp->next;
   }
@@ -79,4 +75,14 @@ Liste removeFromList(Liste l, pthread_t element)
     temp = temp->next;
   }
   return newlist;
+}
+
+
+void mapList(Liste l)
+{
+  while(!isEmpty(l))
+  {
+    printf("%ld\n",(unsigned long)l->data);
+    l = l->next;    
+  }  
 }
