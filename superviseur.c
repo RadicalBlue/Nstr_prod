@@ -19,6 +19,5 @@ void * th_Dialogue()
   pthread_mutex_init (&mutexConvoyeur,NULL);
   
   /** TODO: sigaction avec un siginfo bien défini pour avoir le pid de celui qui envoie le signal **/
-   /** TODO: faire une liste de char* avec des fonction d'ajout et de suppression **/
   
 }

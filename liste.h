@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "erreur.h"
 
 typedef struct s_liste * Liste;
 
@@ -25,7 +26,7 @@ Liste creatList();
  * sans l'élément
  * 
  ******************************************************/
-Liste removeFromList(Liste l, char * element);
+Liste removeFromList(Liste l, pthread_t element);
 
 /*********************************************************
  *
@@ -34,7 +35,7 @@ Liste removeFromList(Liste l, char * element);
  * avec l'élément mis en tête 
  * 
  ********************************************************/
-Liste addInList(Liste l, char * element);
+Liste addInList(Liste l, pthread_t element);
 
 /************************************************
  *
