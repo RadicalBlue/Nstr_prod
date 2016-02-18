@@ -27,9 +27,9 @@ void usinage()
 {
 		X = sender; /* Garder l'ID du thread th_piece qui demande l'usinage*/
 		retirer_piece_du_convoyeur();
-		send(fin_depot_piece_brute_sur_table, X);
+		kill(fin_depot_piece_brute_sur_table, X);
 		usinage();
-		send(fin_usinage, X);
+		kill(fin_usinage, X);
 }
 
 void depot()
