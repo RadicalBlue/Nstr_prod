@@ -3,7 +3,7 @@
 
 struct s_liste {
   Liste next; /* pointeur sur le reste de la liste */
-  char *data
+  pthread_t data;
 };
 
 
@@ -24,13 +24,17 @@ bool isEmpty(Liste l)
   return false;
 }
 
-Liste addInList(Liste l, char * element)
+Liste addInList(Liste l, pthread_t element)
 {
   Liste newlist = creatList();
   
   newlist->next = l;
-  newlist->data = element;
+  newlist->data = malloc(sizeof(pthread_t));
   
+  if(newlist->data == NULL)
+    erreur(": erreur d'allouement d'espace memoire\n", 99);
+  
+  newlist->data = element;
   return newlist;  
 }
 
@@ -50,7 +54,7 @@ void destroyList(Liste l)
 }
 
 
-Liste removeFromList(Liste l, char * element)
+Liste removeFromList(Liste l, pthread_t element)
 {
   Liste temp = l->next;
   
