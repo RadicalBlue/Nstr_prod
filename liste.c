@@ -15,6 +15,7 @@ Liste creatList()
     l->next = NULL;
     l-> data = NULL;
   }
+  else erreur(": erreur d'allouement d'espace memoire\n", 99);
 }
 
 bool isEmpty(Liste l)
