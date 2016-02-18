@@ -2,8 +2,8 @@ CC=gcc
 OPT=-Wall -std=c99 -lpthread -pedantic
 All:Product_Auto
 
-Product_Auto : main.c machine.o robot_alimentation.o robot_retrait.o superviseur.o erreur.o
-	${CC} ${OPT} -o Product_Auto main.c -g machine.o robot_alimentation.o robot_retrait.o superviseur.o erreur.o
+Product_Auto : main.c machine.o robot_alimentation.o robot_retrait.o superviseur.o erreur.o piece.o
+	${CC} ${OPT} -o Product_Auto main.c -g machine.o robot_alimentation.o robot_retrait.o superviseur.o erreur.o piece.o
 
 machine.o : machine.h machine.c
 	${CC} ${OPT} -c machine.c
@@ -19,6 +19,9 @@ superviseur.o : superviseur.c superviseur.h
 
 erreur.o : erreur.c erreur.h
 	${CC} ${OPT} -c erreur.c
+
+piece.o : piece.c piece.h
+	${CC} ${OPT} -c piece.c
 
 clean :
 	rm *.o Product_Auto
