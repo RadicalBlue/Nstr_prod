@@ -18,6 +18,9 @@ void * th_Dialogue()
   
   pthread_mutex_init (&mutexConvoyeur,NULL);
   
+  
+  Liste listeThreadPiece = creatList();
   /** TODO: sigaction avec un siginfo bien défini pour avoir le pid de celui qui envoie le signal **/
+  
   
 }
