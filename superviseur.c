@@ -6,8 +6,17 @@ bool machineEnPanne[NBRMACHINE] = false;
 pthread_mutex_t mutexMachine[NBRMACHINE];
 pthread_mutex_t mutexConvoyeur;
 Liste listeThreadPiece;
+int code_piece, numero_machine;
+bool etat;
 
 
+/***********************************************************
+ * 
+ * 
+ * Fonctions evenementielles
+ * 
+ * *******************************************************/
+/**/
 void fnc_evenementielle_USER1(int s, siginfo_t *siginfo)
 {
   while(!isEmpty(listeThreadPiece))
@@ -23,7 +32,16 @@ void fnc_evenementielle_USER2(int s, siginfo_t *siginfo)
 {
   listeThreadPiece = removeFromList(listeThreadPiece,(pthread_t)siginfo->si_pid);
 }
+/*******************************************************************************************/
 
+
+
+/**********************************************************
+ * 
+ * Procedure du thread dialog 
+ * 
+ * 
+ * *******************************************************/
 void * th_Dialogue()
 {
   int i;
@@ -54,7 +72,6 @@ void * th_Dialogue()
   }
   
  /************************************************************************************************/
-  
  /*******************protection du signal SIGUSR2**************************************************/
   struct sigaction act2;
  
@@ -75,7 +92,7 @@ void * th_Dialogue()
   
   while(1)
   {
-    saisir_ordre_operateur(code_piece);
+    code_piece = saisir_ordre_operateur();
     numero_machine = correspondance_machine_code(code_piece);
     pthread_mutex_lock(mutexConvoyeur);
     etat = machineEnPanne[numero_machine];
@@ -91,8 +108,48 @@ void * th_Dialogue()
     }
     else
     {
-      new_thread = creer_thread(code_piece,numero_machine);
+      pthread_t new_thread = creer_thread(code_piece,numero_machine);
       addInList(listeThreadPiece,new_thread);
     }
   }
 }
+/************************************************************/
+
+
+
+
+/*************************************************************
+ * 
+ * Fonction random sortant un numeros de piece entre 0 et 2
+ * 
+ * 
+ * ***********************************************************/
+  /* On suppose a<b*/
+int rand_a_b(int a, int b)
+{
+    return rand()%(b-a) +a;
+}
+
+
+int saisir_ordre_operateur()
+{
+  srand(time(NULL));
+  return rand_a_b(0,2);
+}
+/*************************************************************/
+
+
+
+/*************************************************************
+ * 
+ * Fonction faisant la correspondance entre le code de la piece
+ * en parametre et la machine qui doit traiter la piece 
+ * 
+ * ***********************************************************/
+int correspondance_machine_code(int code_piece)
+{
+  return code_piece;
+}
+/*************************************************************/
+
+creer_thread(code_piece,numero_machine);
