@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <time.h>
+#include <signal.h>
+#include <sys/stat.h>
 
 #include "liste.h"
 
