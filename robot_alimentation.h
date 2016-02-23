@@ -13,4 +13,6 @@
 #include "liste.h"
 #include "erreur.h"
 
+void * th_Robot_alimentation();
+
 #endif
