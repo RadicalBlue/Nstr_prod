@@ -31,4 +31,4 @@ testListe : test.c liste.o erreur.o
 
 
 clean :
-	rm *.o Product_Auto
+	rm *.o  Product_Auto testListe
