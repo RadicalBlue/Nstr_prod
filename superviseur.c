@@ -16,7 +16,10 @@ bool etat;
  * Fonctions evenementielles
  * 
  * *******************************************************/
-/**/
+/*Fonction exacutee en cas d'envoie du signal SIHUSR1 qui indique la fin anormale
+ * d'un thread de traitement de piece, suite a un probleme durant le depot ou
+ * de retrait de piece
+ */
 void fnc_evenementielle_USER1(int s, siginfo_t *siginfo)
 {
   while(!isEmpty(listeThreadPiece))
@@ -27,7 +30,12 @@ void fnc_evenementielle_USER1(int s, siginfo_t *siginfo)
   }
   erreur("Fin anormale du system\n", 90);
 }
-
+/*
+ *
+ * fonction executee en cas d'envoi du signal SIGUSR2 qui indique la fin nomarle d'un thread 
+ * de traitement de piece ou bien la fin du thread suite au une panne de machine utilisee
+ * 
+ */
 void fnc_evenementielle_USER2(int s, siginfo_t *siginfo)
 {
   listeThreadPiece = removeFromList(listeThreadPiece,(pthread_t)siginfo->si_pid);
@@ -152,4 +160,7 @@ int correspondance_machine_code(int code_piece)
 }
 /*************************************************************/
 
-creer_thread(code_piece,numero_machine);
+pthread_t creer_thread(int code_piece,int numero_machine)
+{
+  /*TODO: retourner l'id du thread cree*/
+}
