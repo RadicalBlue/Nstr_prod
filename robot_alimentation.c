@@ -1,8 +1,14 @@
 #include "robot_alimentation.h"
 
+pid_t sender;
+
 /* Fonction d'attente de signal
  */
-void reveive_sig(int sig) {deposer_pc_brt();}
+void reveive_sig(int sig, siginfo_t * siginfo, void * context) 
+{
+	sender = (pid_t)siginfo->si_pid;	
+	deposer_pc_brt();
+}
 
 /* Fonction qui deposela piece brut sur le convoyeur
  */
@@ -10,6 +16,19 @@ void deposer_pc_brt();
 
 void * th_Robot_alimentation()
 {
+	struct sigaction act;
+
+	memset (&act, '\0', sizeof(act));
+
+	/* Use the sa_sigaction field because the handles has two additional parameters */
+	act.sa_sigaction = &receive_sig;
+
+	/* the SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
+	act.sa_flags = SA_SIGINFO;
+
+	if (sigaction(SIGUSR1, &act, NULL) < 0)
+		erreur("sigaction robot alim", 1);
+
 	while (1);
 }
 
