@@ -50,6 +50,10 @@ void destroyList(Liste l)
     l = removeFirst(l);
 }
 
+pthread_t pullElement(Liste l)
+{
+  return l->data;
+}
 
 Liste removeFromList(Liste l, pthread_t element)
 {

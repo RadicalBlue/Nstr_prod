@@ -5,15 +5,23 @@
 bool machineEnPanne[NBRMACHINE] = false;
 pthread_mutex_t mutexMachine[NBRMACHINE];
 pthread_mutex_t mutexConvoyeur;
+Liste listeThreadPiece;
 
-void fnc_evenementielle_USER1()
+
+void fnc_evenementielle_USER1(int s, siginfo_t *siginfo)
 {
-  
+  while(!isEmpty(listeThreadPiece))
+  {
+    pthread_t th = pullElement(listeThreadPiece);
+    listeThreadPiece = removeFirst(listeThreadPiece);
+    pthread_kill(th,SIGKILL);
+  }
+  erreur("Fin anormale du system\n", 90);
 }
 
-void fnc_evenementielle_USER2()
+void fnc_evenementielle_USER2(int s, siginfo_t *siginfo)
 {
-  
+  listeThreadPiece = removeFromList(listeThreadPiece,(pthread_t)siginfo->si_pid);
 }
 
 void * th_Dialogue()
@@ -27,11 +35,43 @@ void * th_Dialogue()
   
   pthread_mutex_init (&mutexConvoyeur,NULL);
   
+  listeThreadPiece = creatList();
   
-  Liste listeThreadPiece = creatList();
-  /** TODO: sigaction avec un siginfo bien défini pour avoir le pid de celui qui envoie le signal **/
+ /*******************protection du signal SIGUSR1**************************************************/
+  struct sigaction act1;
+ 
+  memset (&act1, '\0', sizeof(struct sigaction));
+
+  /* Use the sa_sigaction field because the handles has two additional parameters */
+  act.sa_sigaction = &fnc_evenementielle_USER1;
+
+  /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
+  act.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGUSR1, &act1, NULL) < 0)
+  {
+    erreur("erreur sigaction : ",96);
+  }
   
-  /** TODO:faire le sigaction **/
+ /************************************************************************************************/
+  
+ /*******************protection du signal SIGUSR2**************************************************/
+  struct sigaction act2;
+ 
+  memset (&act2, '\0', sizeof(struct sigaction));
+
+  /* Use the sa_sigaction field because the handles has two additional parameters */
+  act.sa_sigaction = &fnc_evenementielle_USER2;
+
+  /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
+  act.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGUSR1, &act2, NULL) < 0)
+  {
+    erreur("erreur sigaction : ",96);
+  }
+  
+ /************************************************************************************************/
   
   while(1)
   {

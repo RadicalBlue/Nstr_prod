@@ -57,6 +57,14 @@ Liste removeFirst(Liste l);
 
 /******************************************************
  *
+ * Fonction qui enlève le premier élément 
+ * de la liste mise en paramètre et retroune l'élément
+ * 
+ ******************************************************/
+pthread_t pullElement(Liste l);
+
+/******************************************************
+ *
  * Procedure détruisant la liste en paramètre
  * 
  ******************************************************/
