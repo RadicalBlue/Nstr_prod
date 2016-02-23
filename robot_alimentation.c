@@ -56,7 +56,7 @@ void * th_Robot_alimentation()
 void fnc_evenementielle_timerRA()
 {
 	kill(sender, DEFAILLANCE);
-	exit("arret du robot d'alimentation, car l'operation de depot de piece a dure plus de 20 sec.");
+	erreur("arret du robot d'alimentation, car l'operation de depot de piece a dure plus de 20 sec.", 2);
 }
 
 void deposer_pc_brt()
