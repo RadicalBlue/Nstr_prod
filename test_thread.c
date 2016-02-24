@@ -6,12 +6,24 @@
 #include <signal.h>
 
 pthread_t pid_th;
+sigset_t masque;
 
 void * th1();
 void hdl_th1(int sig, siginfo_t * siginfo, void * context);
 
 int main()
 {
+
+	sigemptyset(&masque);
+	sigaddset(&masque, SIGUSR1);
+	sigaddset(&masque, SIGUSR2);
+
+	if (pthread_sigmask(SIG_BLOCK, &masque, NULL))
+	{
+		fprintf(stderr, "impossible sz faire le pthread_sigmask\n");
+		exit(2);
+	}
+
 	if (pthread_create(&pid_th, NULL, th1, NULL))
 	{
 		fprintf(stderr, "Impossible de lancer le thread\n");
@@ -23,10 +35,9 @@ int main()
 	sleep(2);
 
 	printf("signal à th1\n");
+	pthread_kill(pid_th, SIGUSR1);
 
 	sleep(5);
-
-	pthread_kill(pid_th, SIGUSR1);
 
 	printf("Fin thread principale\n");
 
@@ -35,8 +46,12 @@ int main()
 
 void * th1()
 {
-	/*struct sigaction act;
+	int sig_rec;
+	/*
+	struct sigaction act;
+
 	memset(&act, '\0', sizeof(act));
+
 	act.sa_sigaction = &hdl_th1;
 	act.sa_flags = SA_SIGINFO;
 	if (sigaction(SIGUSR1, &act, NULL) < 0)
@@ -45,11 +60,10 @@ void * th1()
 		exit(11);
 	}
 	*/
-	sigset_t set;
 
 	printf("thread 1 lancé -> pid : %d\n", getpid());
-	pthread_sigwait(&set, SIGUSR1);
-	printf("signal reçu");
+	sigwait(&masque, &sig_rec);
+	printf("signal reçu\n");
 	while (1);
 
 }
