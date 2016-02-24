@@ -26,5 +26,12 @@ int saisir_ordre_operateur();
  * ***********************************************************/
 int correspondance_machine_code(int code_piece);
 
+/*************************************************************
+ * 
+ * Fonction retournant le pid du thread créé et prenant en 
+ * parametre le code de la piece et le numero de la machine
+ * 
+ * ***********************************************************/
+pthread_t creer_thread(int code_piece,int numero_machine);
 
 #endif
