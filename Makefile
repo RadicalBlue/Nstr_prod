@@ -29,6 +29,8 @@ liste.o : liste.c liste.h
 testListe : test.c liste.o erreur.o
 	${CC} ${OPT} -o testListe test.c -g liste.o erreur.o
 
+test_thread : test_thread.c
+	${CC} ${OPT} -o test_thread test_thread.c
 
 clean :
 	rm *.o  Product_Auto testListe
