@@ -30,7 +30,7 @@ void fnc_evenementielle_timerRR();
 
 /* Fonction d'attente de signal
  */
-void reveive_sig(int sig, siginfo_t * siginfo, void * context); 
+void receive_sig(int sig, siginfo_t * siginfo, void * context); 
 
 
 /* CODE */
@@ -78,7 +78,7 @@ void fnc_evenementielle_timerRR()
 	erreur("arret du robot de retrait, car l'operation de retrait de piece ne s'est pas terminee avant 30 sec.", 2);
 }
 
-void receive_sig(int sig)
+void receive_sig(int sig, siginfo_t * siginfo, void * context)
 {
 	sender = (pid_t)siginfo->si_pid;
 	retirer_pc_usn();

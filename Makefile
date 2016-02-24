@@ -1,5 +1,5 @@
 CC=gcc
-OPT=-Wall -std=c99 -lpthread -pedantic
+OPT=-Wall -lpthread
 All:Product_Auto
 
 Product_Auto : main.c machine.o robot_alimentation.o robot_retrait.o superviseur.o erreur.o piece.o liste.o

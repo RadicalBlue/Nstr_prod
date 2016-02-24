@@ -31,7 +31,7 @@ void fnc_evenementielle_timerRA();
 
 /* Fonction d'attente de signal
  */
-void reveive_sig(int sig, siginfo_t * siginfo, void * context); 
+void receive_sig(int sig, siginfo_t * siginfo, void * context); 
 
 /* CODE */
 

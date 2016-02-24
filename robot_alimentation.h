@@ -9,6 +9,7 @@
 #include <time.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #include "liste.h"
 #include "erreur.h"

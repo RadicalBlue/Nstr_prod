@@ -10,9 +10,19 @@
 
 pid_t sender;
 
-/* Fonction qui lance l'usinage de la piece
+/* FONCTIONS */
+
+/* Fonction qui lance l'usinage de base de la piece
  */
 void usinage();
+
+/* Fonction d'usinage de la piece
+ */
+void usinage_pc();
+
+/* Fonction qui depose la piece usinee sur le convoyeur
+ */
+void deposer_piece();
 
 /* Fonction qui depose la piece usiné sur le convoyeur
  */
@@ -21,7 +31,13 @@ void depot();
 /* fonction d'attente de signal
  * Lance une fonction selon le signal reçu
  */
-void receive_sig(int sig);
+void receive_sig(int sig, siginfo_t *siginfo, void * context);
+
+/* Fonction qui retire la piece du convoyeur
+ */
+void retirer_piece_du_convoyeur();
+
+/* CODE */
 
 void * th_Machine()
 {
@@ -43,10 +59,10 @@ void * th_Machine()
 	while (1);
 }
 
-void usinage()
+void usinage_pc()
 {
 	retirer_piece_du_convoyeur();
-	kill(sender, PIECEBRUT)
+	kill(sender, PIECEBRUT);
 	usinage();
 	kill(sender, FINUSINAGE);
 }
@@ -86,7 +102,7 @@ void receive_sig(int sig, siginfo_t * siginfo, void * context)
 	{
 		case (int)SIGUSR1 :
 			//receive(deposer_piece_brute_sur_table);
-			usinage();
+			usinage_pc();
 			break;
 		case (int)SIGUSR2 :
 			//receive(deposer_piece_usinee_sur_convoyeur);
