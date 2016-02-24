@@ -160,7 +160,21 @@ int correspondance_machine_code(int code_piece)
 }
 /*************************************************************/
 
+
+/*************************************************************
+ * 
+ * Fonction retournant le pid du thread créé et prenant en 
+ * parametre le code de la piece et le numero de la machine
+ * 
+ * ***********************************************************/
 pthread_t creer_thread(int code_piece,int numero_machine)
 {
-  /*TODO: retourner l'id du thread cree*/
+  pthread_t new_thread;
+  
+  if(pthread_create(&new_thread,NULL,th_piece,NULL) != 0)
+  {
+    erreur("erreur creation de thread :", 95);
+  }
+  return new_thread;
 }
+/*************************************************************/
