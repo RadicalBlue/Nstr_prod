@@ -6,6 +6,9 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <mqueue.h>
+#include <time.h>
+#include <string.h>
 
 #include "liste.h"
 #include "erreur.h"

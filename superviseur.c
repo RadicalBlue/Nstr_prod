@@ -1,14 +1,33 @@
 #include "superviseur.h"
 #define NBRMACHINE 3
-
+/* les messages envoye par les threads pieces sont les suivants:
+ * "deposer brute conv\0" 
+ * "deposer usine conv\0"
+ * "deposer brute table\0"
+ * "retirer usine conv\0"
+ * 
+ * les messages recu par les threads pieces sont les suivants:
+ * "depose\0"
+ * "retirer\0"
+ * "defaillance\0"
+ */
 
 bool machineEnPanne[NBRMACHINE] = false;
-pthread_mutex_t mutexMachine[NBRMACHINE];
-pthread_mutex_t mutexConvoyeur;
+extern pthread_mutex_t mutexMachine[NBRMACHINE]; /*id du mutex concernant les machines en fonctionnement*/
+extern pthread_mutex_t mutexConvoyeur; /*id du mutex du convoyeur: si il est utilise ou non*/
+extern pthread_t threadID; /*identifiant du thread ayant envoye le signal SIGUSR2 pour signaler un anomalie lors du traitement d'une piece par une machine*/
+extern pthread_t thIdDialog;/*id du thread dialog*/
+extern mqd_t messageQueueRobotAl; /*identifiant de la file de message utilise par les threads pieces et le thread robot alimentation*/
+extern mqd_t messageQueueRobotRe; /*identifiant de la file de message utilise par les threads pieces et le thread robot retrait*/
+extern mqd_t messageQueueMachine[NBRMACHINE]; /*identifiant de la file de message utilise par les threads pieces et les threads machine*/
 Liste listeThreadPiece;
 int code_piece, numero_machine;
 bool etat;
 
+typedef struct s_mydata{
+  int piece;
+  int machine;
+} data;
 
 /***********************************************************
  * 
@@ -20,7 +39,7 @@ bool etat;
  * d'un thread de traitement de piece, suite a un probleme durant le depot ou
  * de retrait de piece
  */
-void fnc_evenementielle_USER1(int s, siginfo_t *siginfo)
+void fnc_evenementielle_USER1(int s)
 {
   while(!isEmpty(listeThreadPiece))
   {
@@ -36,9 +55,9 @@ void fnc_evenementielle_USER1(int s, siginfo_t *siginfo)
  * de traitement de piece ou bien la fin du thread suite au une panne de machine utilisee
  * 
  */
-void fnc_evenementielle_USER2(int s, siginfo_t *siginfo)
+void fnc_evenementielle_USER2(int s)
 {
-  listeThreadPiece = removeFromList(listeThreadPiece,(pthread_t)siginfo->si_pid);
+  listeThreadPiece = removeFromList(listeThreadPiece,threadID);
 }
 /*******************************************************************************************/
 
@@ -67,13 +86,7 @@ void * th_Dialogue()
   struct sigaction act1;
  
   memset (&act1, '\0', sizeof(struct sigaction));
-
-  /* Use the sa_sigaction field because the handles has two additional parameters */
-  act.sa_sigaction = &fnc_evenementielle_USER1;
-
-  /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
-  act.sa_flags = SA_SIGINFO;
-
+  act.sa_handler = &fnc_evenementielle_USER1;
   if (sigaction(SIGUSR1, &act1, NULL) < 0)
   {
     erreur("erreur sigaction : ",96);
@@ -85,11 +98,7 @@ void * th_Dialogue()
  
   memset (&act2, '\0', sizeof(struct sigaction));
 
-  /* Use the sa_sigaction field because the handles has two additional parameters */
-  act.sa_sigaction = &fnc_evenementielle_USER2;
-
-  /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
-  act.sa_flags = SA_SIGINFO;
+  act.sa_handler = &fnc_evenementielle_USER2;
 
   if (sigaction(SIGUSR1, &act2, NULL) < 0)
   {
@@ -123,7 +132,52 @@ void * th_Dialogue()
 }
 /************************************************************/
 
+/**********************************************************
+ * 
+ * Procedure des threads Piece
+ * 
+ * 
+ * *******************************************************/
+void * th_piece(void * param_data)
+{
+  char message[20]; /* message envoye par le thread piece.*/
+  char def[20];/*vairable pour tester les messages recu*/
+  char *messRec; /*message recu par le thread piece*/
+  struct mq_attr attr;/*structure permettant de recevoir les attributs du message dans la file*/
+  ssize_t bitRecu; /*nombre de bit recu*/
+  struct   timespec timer;
+  clock_gettime(CLOCK_REALTIME, &tm); /*initialisation du timer*/
+  size_t sizeMessage = 20;
+  int piece = param_data->piece;
+  int machine = param_data->machine;
+  if(phtread_mutex_lock(&mutexMachine[machine])!=0)
+  {
+    erreur("erreur de verouillage du mutex machine : ",96);
+  }
+    if(phtread_mutex_lock(&mutexConvoyeur)!=0)
+  {
+    erreur("erreur de verouillage du mutex convoyeur : ",96);
+  }
+  strcpy(message,"deposer brute conv");
+  if(mq_send(messageQueueRobotAl,message,sizeMessage,0)!=0)
+  {
+    erreur("envoie du message a la file de message robot al: ",95);
+  }
+  tm.tv_sec += 20;/* timer se declanchera dans 20 secondes */
+  nr = mq_receive(messageQueueRobotAl,messRec, attr.mq_msgsize, NULL, timer);
+  if (nr == -1)
+  {
+    erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
+  }
+  strcpy(def,"defaillance");/*test pour savoir si le message recu est un message de defaillance*/
+  if(messRec == NULL || strcmp(messRec,def))
+  {
+    pthread_kill(SIGUSR1,thIdDialog);
+  }
 
+ 
+ 
+}
 
 
 /*************************************************************
@@ -144,10 +198,6 @@ int saisir_ordre_operateur()
   srand(time(NULL));
   return rand_a_b(0,2);
 }
-/*************************************************************/
-
-
-
 /*************************************************************
  * 
  * Fonction faisant la correspondance entre le code de la piece
@@ -170,8 +220,11 @@ int correspondance_machine_code(int code_piece)
 pthread_t creer_thread(int code_piece,int numero_machine)
 {
   pthread_t new_thread;
+  data param;
+  param.piece = code_piece;
+  param.machine = numero_machine;
   
-  if(pthread_create(&new_thread,NULL,th_piece,NULL) != 0)
+  if(pthread_create(&new_thread,NULL,th_piece,data) != 0)
   {
     erreur("erreur creation de thread :", 95);
   }
