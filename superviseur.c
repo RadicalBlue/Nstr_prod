@@ -1,5 +1,3 @@
-#include "superviseur.h"
-#define NBRMACHINE 3
 /* les messages envoye par les threads pieces sont les suivants:
  * "deposer brute conv\0" 
  * "deposer usine conv\0"
@@ -12,7 +10,11 @@
  * "defaillance\0"
  */
 
-bool machineEnPanne[NBRMACHINE] = false;
+#include "superviseur.h"
+#define NBRMACHINE 3
+
+
+/***************************************************************************************************************************************************/
 extern pthread_mutex_t mutexMachine[NBRMACHINE]; /*id du mutex concernant les machines en fonctionnement*/
 extern pthread_mutex_t mutexConvoyeur; /*id du mutex du convoyeur: si il est utilise ou non*/
 extern pthread_t threadID; /*identifiant du thread ayant envoye le signal SIGUSR2 pour signaler un anomalie lors du traitement d'une piece par une machine*/
@@ -20,6 +22,9 @@ extern pthread_t thIdDialog;/*id du thread dialog*/
 extern mqd_t messageQueueRobotAl; /*identifiant de la file de message utilise par les threads pieces et le thread robot alimentation*/
 extern mqd_t messageQueueRobotRe; /*identifiant de la file de message utilise par les threads pieces et le thread robot retrait*/
 extern mqd_t messageQueueMachine[NBRMACHINE]; /*identifiant de la file de message utilise par les threads pieces et les threads machine*/
+/***************************************************************************************************************************************************/
+
+bool machineEnPanne[NBRMACHINE] = false;
 Liste listeThreadPiece;
 int code_piece, numero_machine;
 bool etat;
@@ -150,6 +155,7 @@ void * th_piece(void * param_data)
   size_t sizeMessage = 20;
   int piece = param_data->piece;
   int machine = param_data->machine;
+  
   if(phtread_mutex_lock(&mutexMachine[machine])!=0)
   {
     erreur("erreur de verouillage du mutex machine : ",96);
@@ -170,10 +176,34 @@ void * th_piece(void * param_data)
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
   strcpy(def,"defaillance");/*test pour savoir si le message recu est un message de defaillance*/
+  /*si on ne reçois pas de message ou un message de defaillance on envoie le signal USR1 au thread th_Dialogue*/
   if(messRec == NULL || strcmp(messRec,def))
   {
+    printf("arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes/n");
     pthread_kill(SIGUSR1,thIdDialog);
   }
+  /*Sinon le thread reçois fin de depot sur convoyeur*/
+  
+  strcpy(message,"deposer brute table");
+  if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
+  {
+    erreur("envoie du message a la file de message robot al: ",95);
+  }
+  
+  tm.tv_sec += 50;/* timer se declanchera dans 20 secondes */
+  nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
+  if (nr == -1)
+  {
+    erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
+  }
+  /*si on ne reçois pas de message on envoie le signal USR2 au thread th_Dialogue*/
+  if(messRec == NULL)
+  {
+    printf("la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes/n", numero_machine);
+    threadID = pthread_self();
+    pthread_kill(SIGUSR2,thIdDialog);
+  }
+  /*sinon le thread reois la fin du de pot piece brute*/
 
  
  
