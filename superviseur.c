@@ -26,7 +26,7 @@ extern mqd_t messageQueueMachine[NBRMACHINE]; /*identifiant de la file de messag
 /***************************************************************************************************************************************************/
 
 bool machineEnPanne[NBRMACHINE] = false;
-Liste listeThreadPiece;
+extern Liste listeThreadPiece;
 int code_piece, numero_machine;
 bool etat;
 
@@ -86,7 +86,6 @@ void * th_Dialogue()
   
   pthread_mutex_init (&mutexConvoyeur,NULL);
   
-  listeThreadPiece = creatList();
   
  /*******************protection du signal SIGUSR1**************************************************/
   struct sigaction act1;
@@ -165,7 +164,7 @@ void * th_piece(void * param_data)
   {
     erreur("erreur de verouillage du mutex convoyeur : ",96);
   }
-  strcpy(message,"deposer brute conv");
+  sprintf(message,"deposer brute conv");
   if(mq_send(messageQueueRobotAl,message,sizeMessage,0)!=0)
   {
     erreur("envoie du message a la file de message robot al: ",95);
@@ -176,7 +175,8 @@ void * th_piece(void * param_data)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
-  strcpy(def,"defaillance");/*test pour savoir si le message recu est un message de defaillance*/
+  
+  sprintf(def,"defaillance");/*test pour savoir si le message recu est un message de defaillance*/
   /*si on ne reçois pas de message ou un message de defaillance on envoie le signal USR1 au thread th_Dialogue*/
   if(messRec == NULL || strcmp(messRec,def))
   {
@@ -185,7 +185,7 @@ void * th_piece(void * param_data)
   }
   /*Sinon le thread reçois fin de depot sur convoyeur*/
   
-  strcpy(message,"deposer brute table");
+  sprintf(message,"deposer brute table");
   if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
   {
     erreur("envoie du message a la file de message table: ",95);
@@ -229,7 +229,7 @@ void * th_piece(void * param_data)
   /*sinon il recois fin usinage*/
   pthread_mutex_lock(&mutexConvoyeur);
   
-  strcpy(message,"deposer usine conv");
+  sprintf(message,"deposer usine conv");
   if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
   {
     erreur("envoie du message a la file de message table: ",95);
@@ -247,7 +247,7 @@ void * th_piece(void * param_data)
     pthread_kill(SIGUSR1,thIdDialog);
   }
   /*sinon le thread recois fin de depot piece piece usine sur convoyeur*/
-  strcpy(message,"retirer usine conv");
+  sprintf(message,"retirer usine conv");
   if(mq_send(messageQueueRobotRe,message,sizeMessage,0)!=0)
   {
     erreur("envoie du message a la file de message robot retrait: ",95);
