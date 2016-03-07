@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <mqueue.h>
 
 #include "liste.h"
 #include "erreur.h"
