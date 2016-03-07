@@ -17,6 +17,7 @@
 /***************************************************************************************************************************************************/
 extern pthread_mutex_t mutexMachine[NBRMACHINE]; /*id du mutex concernant les machines en fonctionnement*/
 extern pthread_mutex_t mutexConvoyeur; /*id du mutex du convoyeur: si il est utilise ou non*/
+extern pthread_mutex_t mutexEtat; /*id du mutex des etat pour assurer que deux threads ne change pas l'etat d'une machine en meme temps*/
 extern pthread_t threadID; /*identifiant du thread ayant envoye le signal SIGUSR2 pour signaler un anomalie lors du traitement d'une piece par une machine*/
 extern pthread_t thIdDialog;/*id du thread dialog*/
 extern mqd_t messageQueueRobotAl; /*identifiant de la file de message utilise par les threads pieces et le thread robot alimentation*/
@@ -160,7 +161,7 @@ void * th_piece(void * param_data)
   {
     erreur("erreur de verouillage du mutex machine : ",96);
   }
-    if(phtread_mutex_lock(&mutexConvoyeur)!=0)
+  if(phtread_mutex_lock(&mutexConvoyeur)!=0)
   {
     erreur("erreur de verouillage du mutex convoyeur : ",96);
   }
@@ -187,10 +188,10 @@ void * th_piece(void * param_data)
   strcpy(message,"deposer brute table");
   if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
   {
-    erreur("envoie du message a la file de message robot al: ",95);
+    erreur("envoie du message a la file de message table: ",95);
   }
   
-  tm.tv_sec += 50;/* timer se declanchera dans 20 secondes */
+  tm.tv_sec += 50;/* timer se declanchera dans 50 secondes */
   nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
   if (nr == -1)
   {
@@ -203,10 +204,71 @@ void * th_piece(void * param_data)
     threadID = pthread_self();
     pthread_kill(SIGUSR2,thIdDialog);
   }
-  /*sinon le thread reois la fin du de pot piece brute*/
-
- 
- 
+  /*sinon le thread recois la fin du de pot piece brute sur table*/
+  if(pthread_mutex_unlock(&mutexConvoyeur)!=0) /*liberation du mutex convoyeur*/
+  {
+    erreur("erreur de verouillage du mutex convoyeur : ",96);
+  }
+  
+  tm.tv_sec += 600;/* timer se declanchera dans 10 minutes */
+  nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
+  if (nr == -1)
+  {
+    erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
+  }
+  
+   if(messRec == NULL)
+  {
+    pthread_mutex_lock(&mutexEtat);
+    machineEnPanne[numero_machine] = true;
+    pthread_mutex_unlock(&mutexEtat);
+    printf("la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes/n", numero_machine);
+    threadID = pthread_self();
+    pthread_kill(SIGUSR2,thIdDialog);
+  }
+  /*sinon il recois fin usinage*/
+  pthread_mutex_lock(&mutexConvoyeur);
+  
+  strcpy(message,"deposer usine conv");
+  if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
+  {
+    erreur("envoie du message a la file de message table: ",95);
+  }
+  
+  tm.tv_sec += 30;/* timer se declanchera dans 30 secondes */
+  nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
+  if (nr == -1)
+  {
+    erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
+  }
+  if(messRec == NULL)
+  {
+    printf("la machine numero %d n'a pas depose la pièce usine sur le convoyeur après 30 secondes/n", numero_machine);
+    pthread_kill(SIGUSR1,thIdDialog);
+  }
+  /*sinon le thread recois fin de depot piece piece usine sur convoyeur*/
+  strcpy(message,"retirer usine conv");
+  if(mq_send(messageQueueRobotRe,message,sizeMessage,0)!=0)
+  {
+    erreur("envoie du message a la file de message robot retrait: ",95);
+  }
+  
+  tm.tv_sec += 30;/* timer se declanchera dans 30 secondes */
+  nr = mq_receive(messageQueueRobotRe,messRec, attr.mq_msgsize, NULL, timer);
+  if (nr == -1)
+  {
+    erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
+  }
+  if(messRec == NULL)
+  {
+    printf("arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes/n");
+    pthread_kill(SIGUSR1,thIdDialog);
+  }
+  /*Sinon: le thread recois fin retrait piece usinee du convoyeur*/
+  pthread_mutex_unlock(&mutexConvoyeur);
+  pthread_mutex_unlock(&mutexMachine[numero_machine]);
+  pthread_kill(SIGUSR2,thIdDialog);
+  printf("Usinage de la piece %d : OK \n",code_piece);
 }
 
 
