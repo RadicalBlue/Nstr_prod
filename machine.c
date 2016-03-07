@@ -1,14 +1,17 @@
 #include "machine.h"
 
-#define PIECEBRUT SIGUSR1 /* fin de depot de la piece brut sur la table */
-#define PIECEUSINEE SIGUSR1 /* fin depot piece usinee sur convoyeur */
-#define FINUSINAGE SIGUSR2 /* fin usinage de la piece */
+//#define PIECEBRUT SIGUSR1 /* fin de depot de la piece brut sur la table */
+//#define PIECEUSINEE SIGUSR1 /* fin depot piece usinee sur convoyeur */
+//#define FINUSINAGE SIGUSR2 /* fin usinage de la piece */
 
 #define TEMPSUSINAGE 5
 #define TEMPSRETRAIT 5
 #define TEMPSDEPOSE 5
 
-pid_t sender;
+//pid_t sender;
+extern pthread_t machine[4];
+int i_th;
+
 
 /* FONCTIONS */
 
@@ -41,30 +44,52 @@ void retirer_piece_du_convoyeur();
 
 void * th_Machine()
 {
-	struct sigaction act;
+	pthread_t moi = pthread_self();
 
-	memset (&act, '\0', sizeof(act));
+	i_th = 0;
+
+	while (machine[i_th] != moi)
+		i_th++;
+
+	//struct sigaction act;
+
+	//memset (&act, '\0', sizeof(act));
 
 	/* Use the sa_sigaction field because the handles has two additional parameters */
-	act.sa_sigaction = &receive_sig;
+	//act.sa_sigaction = &receive_sig;
 
 	/* the SA_SIGINFO flag tells sigaction() to use the sa_sigaction field, not sa_handler. */
-	act.sa_flags = SA_SIGINFO;
+	//act.sa_flags = SA_SIGINFO;
 
-	if (sigaction(SIGUSR1, &act, NULL) < 0)
-		erreur("sigaction1 machine", 1);
-	if (sigaction(SIGUSR2, &act, NULL) < 0)
-		erreur("sigaction2 machine", 1);
+	//if (sigaction(SIGUSR1, &act, NULL) < 0)
+	//	erreur("sigaction1 machine", 1);
+	//if (sigaction(SIGUSR2, &act, NULL) < 0)
+	//	erreur("sigaction2 machine", 1);
+	
+	struct sigevent not;
+
+	not.sigev_notify = SIGEV_THREAD;
+	not.sigev_notify_function = receive_sig;
+	not.sigev_notify_attributes = NULL;
+	not.sigev_value.sival_ptr = &TROLOLO_TODO;
+	if (mq_notify(TROLOLO_TODO, &not) == -1) {
+		perror("mq_notify");
+		exit(EXIT_FAILURE);
+	}
 
 	while (1);
 }
 
 void usinage_pc()
 {
+	char * depotUsnTbl = "deposer brute table\0";
+	char * depotUsnCnv = "deposer usine conv\0";
 	retirer_piece_du_convoyeur();
-	kill(sender, PIECEBRUT);
+	//kill(sender, PIECEBRUT);
+	mq_send(TROLOLO_TODO, depotUsnTbl, strlen(depotUsnTbl), (unsigned int) 0);
 	usinage();
-	kill(sender, FINUSINAGE);
+	//kill(sender, FINUSINAGE);
+	mq_send(TROLOLO_TODO, depotUsnCnv, strlen(depotUsnCnv), (unsigned int) 0);
 }
 
 void usinage()
