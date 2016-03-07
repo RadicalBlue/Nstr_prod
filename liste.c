@@ -59,7 +59,7 @@ Liste removeFromList(Liste l, pthread_t element)
 {
   Liste temp = l->next;
   
-  while(temp->data != element && temp->data != 0)
+  while(pthread_equal(temp->data,element)== 0 && temp->data != 0)
   {
     temp = temp->next;
   }
@@ -68,7 +68,7 @@ Liste removeFromList(Liste l, pthread_t element)
   
   Liste newlist = creatList();
   
-  while(l->data != element)
+  while(pthread_equal(temp->data,element)== 0)
   {
     newlist = addInList(newlist,l->data);
     l = l->next;

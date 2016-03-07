@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <mqueue.h>
+#include <time.h>
 
 pthread_t pid_th;
 sigset_t masque;
