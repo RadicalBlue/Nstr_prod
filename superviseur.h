@@ -9,7 +9,7 @@
 #include <mqueue.h>
 #include <time.h>
 #include <string.h>
-
+#include <signal.h>
 #include "liste.h"
 #include "erreur.h"
 /*************************************************************

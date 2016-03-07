@@ -25,7 +25,7 @@ extern mqd_t messageQueueRobotRe; /*identifiant de la file de message utilise pa
 extern mqd_t messageQueueMachine[NBRMACHINE]; /*identifiant de la file de message utilise par les threads pieces et les threads machine*/
 /***************************************************************************************************************************************************/
 
-bool machineEnPanne[NBRMACHINE] = false;
+bool machineEnPanne[NBRMACHINE] = {false};
 extern Liste listeThreadPiece;
 int code_piece, numero_machine;
 bool etat;
@@ -33,7 +33,7 @@ bool etat;
 typedef struct s_mydata{
   int piece;
   int machine;
-} data;
+} Data;
 
 /***********************************************************
  * 
@@ -91,7 +91,7 @@ void * th_Dialogue()
   struct sigaction act1;
  
   memset (&act1, '\0', sizeof(struct sigaction));
-  act.sa_handler = &fnc_evenementielle_USER1;
+  act1.sa_handler = &fnc_evenementielle_USER1;
   if (sigaction(SIGUSR1, &act1, NULL) < 0)
   {
     erreur("erreur sigaction : ",96);
@@ -103,7 +103,7 @@ void * th_Dialogue()
  
   memset (&act2, '\0', sizeof(struct sigaction));
 
-  act.sa_handler = &fnc_evenementielle_USER2;
+  act2.sa_handler = &fnc_evenementielle_USER2;
 
   if (sigaction(SIGUSR1, &act2, NULL) < 0)
   {
@@ -116,9 +116,9 @@ void * th_Dialogue()
   {
     code_piece = saisir_ordre_operateur();
     numero_machine = correspondance_machine_code(code_piece);
-    pthread_mutex_lock(mutexConvoyeur);
+    pthread_mutex_lock(&mutexConvoyeur);
     etat = machineEnPanne[numero_machine];
-    pthread_mutex_unlock(mutexConvoyeur);
+    pthread_mutex_unlock(&mutexConvoyeur);
     if(etat == true)
     {
       printf("machine demandee en panne\n");
@@ -147,20 +147,21 @@ void * th_piece(void * param_data)
 {
   char message[20]; /* message envoye par le thread piece.*/
   char def[20];/*vairable pour tester les messages recu*/
-  char *messRec; /*message recu par le thread piece*/
+  void *messRec; /*message recu par le thread piece*/
   struct mq_attr attr;/*structure permettant de recevoir les attributs du message dans la file*/
   ssize_t bitRecu; /*nombre de bit recu*/
   struct   timespec timer;
-  clock_gettime(CLOCK_REALTIME, &tm); /*initialisation du timer*/
+  clock_gettime(CLOCK_REALTIME, &timer); /*initialisation du timer*/
   size_t sizeMessage = 20;
-  int piece = param_data->piece;
-  int machine = param_data->machine;
+  Data *p_data = (Data*)param_data;
+  /*int piece = p_data->piece;*/
+  int machine = p_data->machine;
   
-  if(phtread_mutex_lock(&mutexMachine[machine])!=0)
+  if(pthread_mutex_lock(&mutexMachine[machine])!=0)
   {
     erreur("erreur de verouillage du mutex machine : ",96);
   }
-  if(phtread_mutex_lock(&mutexConvoyeur)!=0)
+  if(pthread_mutex_lock(&mutexConvoyeur)!=0)
   {
     erreur("erreur de verouillage du mutex convoyeur : ",96);
   }
@@ -169,9 +170,10 @@ void * th_piece(void * param_data)
   {
     erreur("envoie du message a la file de message robot al: ",95);
   }
-  tm.tv_sec += 20;/* timer se declanchera dans 20 secondes */
-  nr = mq_receive(messageQueueRobotAl,messRec, attr.mq_msgsize, NULL, timer);
-  if (nr == -1)
+  messRec=malloc(attr.mq_msgsize);
+  timer.tv_sec += 20;/* timer se declanchera dans 20 secondes */
+  bitRecu =mq_timedreceive(messageQueueRobotAl,messRec, attr.mq_msgsize, NULL, &timer);
+  if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
@@ -190,10 +192,10 @@ void * th_piece(void * param_data)
   {
     erreur("envoie du message a la file de message table: ",95);
   }
-  
-  tm.tv_sec += 50;/* timer se declanchera dans 50 secondes */
-  nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
-  if (nr == -1)
+  messRec=malloc(attr.mq_msgsize);
+  timer.tv_sec += 50;/* timer se declanchera dans 50 secondes */
+  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
+  if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
@@ -209,10 +211,10 @@ void * th_piece(void * param_data)
   {
     erreur("erreur de verouillage du mutex convoyeur : ",96);
   }
-  
-  tm.tv_sec += 600;/* timer se declanchera dans 10 minutes */
-  nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
-  if (nr == -1)
+  messRec=malloc(attr.mq_msgsize);
+  timer.tv_sec += 600;/* timer se declanchera dans 10 minutes */
+  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
+  if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
@@ -234,10 +236,10 @@ void * th_piece(void * param_data)
   {
     erreur("envoie du message a la file de message table: ",95);
   }
-  
-  tm.tv_sec += 30;/* timer se declanchera dans 30 secondes */
-  nr = mq_receive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, timer);
-  if (nr == -1)
+  messRec=malloc(attr.mq_msgsize);
+  timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
+  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
+  if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
@@ -252,10 +254,10 @@ void * th_piece(void * param_data)
   {
     erreur("envoie du message a la file de message robot retrait: ",95);
   }
-  
-  tm.tv_sec += 30;/* timer se declanchera dans 30 secondes */
-  nr = mq_receive(messageQueueRobotRe,messRec, attr.mq_msgsize, NULL, timer);
-  if (nr == -1)
+  messRec=malloc(attr.mq_msgsize);
+  timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
+  bitRecu =mq_timedreceive(messageQueueRobotRe,messRec, attr.mq_msgsize, NULL, &timer);
+  if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
@@ -269,6 +271,7 @@ void * th_piece(void * param_data)
   pthread_mutex_unlock(&mutexMachine[numero_machine]);
   pthread_kill(SIGUSR2,thIdDialog);
   printf("Usinage de la piece %d : OK \n",code_piece);
+  pthread_exit(0);
 }
 
 
@@ -312,11 +315,11 @@ int correspondance_machine_code(int code_piece)
 pthread_t creer_thread(int code_piece,int numero_machine)
 {
   pthread_t new_thread;
-  data param;
+  Data param;
   param.piece = code_piece;
   param.machine = numero_machine;
   
-  if(pthread_create(&new_thread,NULL,th_piece,data) != 0)
+  if(pthread_create(&new_thread,NULL,th_piece,&param) != 0)
   {
     erreur("erreur creation de thread :", 95);
   }
