@@ -51,13 +51,13 @@ void * th_Robot_retrait()
 	//if (sigaction(SIGUSR1, &act, NULL) < 0)
 	//	erreur("sigaction robot retrait", 1);
 
-	mqd_t mqdes;
+	//mqd_t mqdes;
 	struct sigevent not;
 
 	not.sigev_notify = SIGEV_THREAD;
 	not.sigev_notify_function = receive_sig;
 	not.sigev_notify_attributes = NULL;
-	not.sigev_value.sival_ptr = &mqdes;   /* Arg. to thread func. */
+	not.sigev_value.sival_ptr = &messageQueueRobotRe;   /* Arg. to thread func. */
 	if (mq_notify(messageQueueRobotRe, &not) == -1) {
 		perror("mq_notify");
 		exit(EXIT_FAILURE);
