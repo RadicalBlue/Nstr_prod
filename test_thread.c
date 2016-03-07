@@ -46,8 +46,8 @@ int main()
 
 void * th1()
 {
-	int sig_rec;
-	/*
+	//int sig_rec;
+	
 	struct sigaction act;
 
 	memset(&act, '\0', sizeof(act));
@@ -59,13 +59,13 @@ void * th1()
 		fprintf(stderr, "pb sigaction\n");
 		exit(11);
 	}
-	*/
+	
 
-	printf("thread 1 lancé -> pid : %d\n", getpid());
-	sigwait(&masque, &sig_rec);
-	printf("signal reçu\n");
+	printf("thread 1 lancé -> pid : %d / tid : %ld\n", getpid(), pthread_self());
+	//sigwait(&masque, &sig_rec);
+	//printf("signal reçu\n");
 	while (1);
-
+	printf("lol\n");
 }
 
 void hdl_th1(int sig, siginfo_t * siginfo, void * context)
