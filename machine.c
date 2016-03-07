@@ -7,9 +7,12 @@
 #define TEMPSUSINAGE 5
 #define TEMPSRETRAIT 5
 #define TEMPSDEPOSE 5
+#define NBRMACHINE 3
 
 //pid_t sender;
 extern pthread_t machine[4];
+extern mqd_t messageQueueMachine[NBRMACHINE];
+
 int i_th;
 
 
@@ -34,7 +37,7 @@ void depot();
 /* fonction d'attente de signal
  * Lance une fonction selon le signal reçu
  */
-void receive_sig(int sig, siginfo_t *siginfo, void * context);
+void receive_sig(union sigval sv);
 
 /* Fonction qui retire la piece du convoyeur
  */
@@ -71,8 +74,8 @@ void * th_Machine()
 	not.sigev_notify = SIGEV_THREAD;
 	not.sigev_notify_function = receive_sig;
 	not.sigev_notify_attributes = NULL;
-	not.sigev_value.sival_ptr = &TROLOLO_TODO;
-	if (mq_notify(TROLOLO_TODO, &not) == -1) {
+	not.sigev_value.sival_ptr = &messageQueueMachine[i_th];
+	if (mq_notify(messageQueueMachine[i_th], &not) == -1) {
 		perror("mq_notify");
 		exit(EXIT_FAILURE);
 	}
@@ -83,13 +86,13 @@ void * th_Machine()
 void usinage_pc()
 {
 	char * depotUsnTbl = "deposer brute table\0";
-	char * depotUsnCnv = "deposer usine conv\0";
+	char * finUsn = "fin usinage piece\0";
 	retirer_piece_du_convoyeur();
 	//kill(sender, PIECEBRUT);
-	mq_send(TROLOLO_TODO, depotUsnTbl, strlen(depotUsnTbl), (unsigned int) 0);
+	mq_send(messageQueueMachine[i_th], depotUsnTbl, strlen(depotUsnTbl), (unsigned int) 0);
 	usinage();
 	//kill(sender, FINUSINAGE);
-	mq_send(TROLOLO_TODO, depotUsnCnv, strlen(depotUsnCnv), (unsigned int) 0);
+	mq_send(messageQueueMachine[i_th], finUsn, strlen(finUsn), (unsigned int) 0);
 }
 
 void usinage()
@@ -108,8 +111,10 @@ void retirer_piece_du_convoyeur()
 
 void depot()
 {
+	char * msg = "depose usine conv\0";
 	deposer_piece();
-	kill(sender, PIECEUSINEE);
+	//kill(sender, PIECEUSINEE);
+	mq_send(messageQueueMachine[i_th], msg, strlen(msg), (unsigned int) 0);
 }
 
 void deposer_piece()
@@ -119,17 +124,42 @@ void deposer_piece()
 	printf("Piece deposee\n");
 }
 
-void receive_sig(int sig, siginfo_t * siginfo, void * context)
+void receive_sig(union sigval sv)
 {
-	sender = (pid_t)siginfo->si_pid;
+	//sender = (pid_t)siginfo->si_pid;
+	struct mq_attr attr;
+	ssize_t nr;
+	void * buf;
+	char * msg;
+	mqd_t mqdes = *((mqd_t *) sv.sival_ptr);
 
-	switch (sig)
+	if (mq_getattr(mqdes, &attr) == -1) {
+		perror("mq_getattr");
+		exit(EXIT_FAILURE);
+	}
+	buf = malloc(attr.mq_msgsize);
+
+	if (buf == NULL) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+
+	nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
+	if (nr == -1) {
+		perror("mq_receive");
+		exit(EXIT_FAILURE);
+	}
+
+	msg = (char *) buf;
+
+	
+	switch (msg[8])
 	{
-		case (int)SIGUSR1 :
+		case 'b' :
 			//receive(deposer_piece_brute_sur_table);
 			usinage_pc();
 			break;
-		case (int)SIGUSR2 :
+		case 'u' :
 			//receive(deposer_piece_usinee_sur_convoyeur);
 			depot();
 	}

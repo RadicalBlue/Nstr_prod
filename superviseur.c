@@ -3,6 +3,7 @@
  * "deposer usine conv\0"
  * "deposer brute table\0"
  * "retirer usine conv\0"
+ * "fin usinage piece\0"
  * 
  * les messages recu par les threads pieces sont les suivants:
  * "depose\0"
