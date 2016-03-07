@@ -37,4 +37,20 @@ int correspondance_machine_code(int code_piece);
  * ***********************************************************/
 pthread_t creer_thread(int code_piece,int numero_machine);
 
+/**********************************************************
+ * 
+ * Procedure du thread dialog 
+ * 
+ * 
+ * *******************************************************/
+void * th_Dialogue();
+
+/**********************************************************
+ * 
+ * Procedure des threads Piece
+ * 
+ * 
+ * *******************************************************/
+void * th_piece(void * param_data);
+
 #endif
