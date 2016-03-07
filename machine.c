@@ -37,7 +37,7 @@ void depot();
 /* fonction d'attente de signal
  * Lance une fonction selon le signal reçu
  */
-void receive_sig(union sigval sv);
+static void receive_sig(union sigval sv);
 
 /* Fonction qui retire la piece du convoyeur
  */
@@ -124,7 +124,7 @@ void deposer_piece()
 	printf("Piece deposee\n");
 }
 
-void receive_sig(union sigval sv)
+static void receive_sig(union sigval sv)
 {
 	//sender = (pid_t)siginfo->si_pid;
 	struct mq_attr attr;

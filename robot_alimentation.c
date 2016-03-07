@@ -32,7 +32,7 @@ void deposer_pc_brt();
 
 /* Fonction d'attente de signal
  */
-void receive_sig(union sigval sv);
+static void receive_sig(union sigval sv);
 
 /* CODE */
 
@@ -95,7 +95,7 @@ void deposer_piece_brute()
 	printf("Piece brut deposee sur le convoyeur\n");
 }
 
-void receive_sig(union sigval sv) 
+static void receive_sig(union sigval sv) 
 {
 	//sender = (pid_t)siginfo->si_pid;	
 	struct mq_attr attr;
