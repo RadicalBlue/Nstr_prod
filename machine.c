@@ -99,16 +99,16 @@ void usinage_pc()
 
 void usinage()
 {
-	printf("Usinage de la piece\n");
+	printf("machine %d : Usinage de la piece\n", i_th + 1);
 	sleep(TEMPSUSINAGE);
-	printf("Piece usinee\n");
+	printf("machine %d : Piece usinee\n", i_th + 1);
 }
 
 void retirer_piece_du_convoyeur()
 {
-	printf("Retrait de la piece du convoyeur\n");
+	printf("machine %d : Retrait de la piece du convoyeur\n", i_th + 1);
 	sleep(TEMPSRETRAIT);
-	printf("Piece retiree du convoyeur\n");
+	printf("machine %d : Piece retiree du convoyeur\n", i_th + 1);
 }
 
 void depot()
@@ -121,9 +121,9 @@ void depot()
 
 void deposer_piece()
 {
-	printf("depose de la piece\n");
+	printf("machine %d : depose de la piece\n", i_th + 1);
 	sleep(TEMPSDEPOSE);
-	printf("Piece deposee\n");
+	printf("machine %d : Piece deposee\n", i_th + 1);
 }
 
 static void receive_sig(union sigval sv)
@@ -136,19 +136,19 @@ static void receive_sig(union sigval sv)
 	mqd_t mqdes = *((mqd_t *) sv.sival_ptr);
 
 	if (mq_getattr(mqdes, &attr) == -1) {
-		perror("mq_getattr");
+		perror("machine : mq_getattr");
 		exit(EXIT_FAILURE);
 	}
 	buf = malloc(attr.mq_msgsize);
 
 	if (buf == NULL) {
-		perror("malloc");
+		perror("machine : malloc");
 		exit(EXIT_FAILURE);
 	}
 
 	nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
 	if (nr == -1) {
-		perror("mq_receive");
+		perror("machine : mq_receive");
 		exit(EXIT_FAILURE);
 	}
 

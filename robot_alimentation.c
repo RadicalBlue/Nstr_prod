@@ -91,9 +91,9 @@ void deposer_pc_brt()
 
 void deposer_piece_brute()
 {
-	printf("Depose de la piece brut sur le convoyeur\n");
+	printf("Robot alimentation : Depose de la piece brut sur le convoyeur\n");
 	sleep(TEMPSDEPOT);
-	printf("Piece brut deposee sur le convoyeur\n");
+	printf("Robot alimentation : Piece brut deposee sur le convoyeur\n");
 }
 
 static void receive_sig(union sigval sv) 
@@ -106,21 +106,21 @@ static void receive_sig(union sigval sv)
 
 
 	if (mq_getattr(mqdes, &attr) == -1) {
-		perror("mq_getattr");
+		perror("Robot_al : mq_getattr");
 		exit(EXIT_FAILURE);
 	}
 	buf = malloc(attr.mq_msgsize);
 
 
 	if (buf == NULL) {
-		perror("malloc");
+		perror("Robot_al : malloc");
 		exit(EXIT_FAILURE);
 	}
 
 
 	nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
 	if (nr == -1) {
-		perror("mq_receive");
+		perror("Robot_al : mq_receive");
 		exit(EXIT_FAILURE);
 	}
 
