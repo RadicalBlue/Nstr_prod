@@ -173,19 +173,19 @@ void * th_piece(void * param_data)
     erreur("envoie du message a la file de message robot al: ",95);
   }
   messRec=malloc(attr.mq_msgsize);
-  printf("j'attends de recevoir la confirmation du robot allimentation");
+  printf("j'attends de recevoir la confirmation du robot alimentation\n");
   timer.tv_sec += 20;/* timer se declanchera dans 20 secondes */
   bitRecu =mq_timedreceive(messageQueueRobotAl,messRec, attr.mq_msgsize, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
-  printf("j'ai recu la confirmation du robot allimentation");
+  printf("j'ai recu la confirmation du robot alimentation\n");
   sprintf(def,"defaillance");/*test pour savoir si le message recu est un message de defaillance*/
   /*si on ne reçois pas de message ou un message de defaillance on envoie le signal USR1 au thread th_Dialogue*/
   if(messRec == NULL || strcmp(messRec,def))
   {
-    printf("arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes/n");
+    printf("arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes\n");
     pthread_kill(SIGUSR1,thIdDialog);
   }
   /*Sinon le thread reçois fin de depot sur convoyeur*/
@@ -197,7 +197,7 @@ void * th_piece(void * param_data)
     erreur("envoie du message a la file de message table: ",95);
   }
   messRec=malloc(attr.mq_msgsize);
-  printf("j'attends de recevoir la confirmation de la machine%d",numero_machine);
+  printf("j'attends de recevoir la confirmation de la machine%d\n",numero_machine);
   timer.tv_sec += 50;/* timer se declanchera dans 50 secondes */
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
   if (bitRecu == -1)
@@ -205,10 +205,10 @@ void * th_piece(void * param_data)
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
   /*si on ne reçois pas de message on envoie le signal USR2 au thread th_Dialogue*/
-  printf("j'ai recu la confirmation de la machine%d",numero_machine);
+  printf("j'ai recu la confirmation de la machine%d\n",numero_machine);
   if(messRec == NULL)
   {
-    printf("la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes/n", numero_machine);
+    printf("la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes\n", numero_machine);
     threadID = pthread_self();
     pthread_kill(SIGUSR2,thIdDialog);
   }
@@ -218,20 +218,20 @@ void * th_piece(void * param_data)
     erreur("erreur de verouillage du mutex convoyeur : ",96);
   }
   messRec=malloc(attr.mq_msgsize);
-  printf("j'attends que la machine%d finisse de travailler",numero_machine);
+  printf("j'attends que la machine%d finisse de travailler\n",numero_machine);
   timer.tv_sec += 600;/* timer se declanchera dans 10 minutes */
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
-  printf("j'ai recu la confirmation de fin d'usinage par la machine%d",numero_machine);
+  printf("j'ai recu la confirmation de fin d'usinage par la machine%d\n",numero_machine);
    if(messRec == NULL)
   {
     pthread_mutex_lock(&mutexEtat);
     machineEnPanne[numero_machine] = true;
     pthread_mutex_unlock(&mutexEtat);
-    printf("la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes/n", numero_machine);
+    printf("la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes\n", numero_machine);
     threadID = pthread_self();
     pthread_kill(SIGUSR2,thIdDialog);
   }
@@ -245,17 +245,17 @@ void * th_piece(void * param_data)
     erreur("envoie du message a la file de message table: ",95);
   }
   messRec=malloc(attr.mq_msgsize);
-  printf("j'attends de recevoir la confirmation de depot de la machine%d",numero_machine);
+  printf("j'attends de recevoir la confirmation de depot de la machine%d\n",numero_machine);
   timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
-  printf("j'ai recu la confirmation de depot de la machine%d",numero_machine);
+  printf("j'ai recu la confirmation de depot de la machine%d\n",numero_machine);
   if(messRec == NULL)
   {
-    printf("la machine numero %d n'a pas depose la pièce usine sur le convoyeur après 30 secondes/n", numero_machine);
+    printf("la machine numero %d n'a pas depose la pièce usine sur le convoyeur après 30 secondes\n", numero_machine);
     pthread_kill(SIGUSR1,thIdDialog);
   }
   /*sinon le thread recois fin de depot piece piece usine sur convoyeur*/
@@ -266,17 +266,17 @@ void * th_piece(void * param_data)
     erreur("envoie du message a la file de message robot retrait: ",95);
   }
   messRec=malloc(attr.mq_msgsize);
-  printf("j'attends de recevoir la confirmation du robot de retrait");
+  printf("j'attends de recevoir la confirmation du robot de retrait\n");
   timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
   bitRecu =mq_timedreceive(messageQueueRobotRe,messRec, attr.mq_msgsize, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
-  printf("j'ai recu la confirmation du robot retrait");
+  printf("j'ai recu la confirmation du robot retrait\n");
   if(messRec == NULL)
   {
-    printf("arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes/n");
+    printf("arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes\n");
     pthread_kill(SIGUSR1,thIdDialog);
   }
   /*Sinon: le thread recois fin retrait piece usinee du convoyeur*/
