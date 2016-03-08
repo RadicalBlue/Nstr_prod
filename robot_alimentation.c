@@ -98,6 +98,7 @@ void deposer_piece_brute()
 
 static void receive_sig(union sigval sv) 
 {
+	printf("Robot alimentation : message recu!\n");
 	//sender = (pid_t)siginfo->si_pid;	
 	struct mq_attr attr;
 	ssize_t nr;
