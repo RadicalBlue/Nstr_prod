@@ -78,6 +78,7 @@ void fnc_evenementielle_USER2(int s)
  * *******************************************************/
 void * th_Dialogue()
 {
+	printf("dialogue : start\n");
   int i;
   /*initialisation des mutex*/
   for(i = 0 ; i < NBRMACHINE; i++)
@@ -146,6 +147,7 @@ void * th_Dialogue()
  * *******************************************************/
 void * th_piece(void * param_data)
 {
+	printf("piece %lX : start\n", (long) pthread_self());
   char message[20]; /* message envoye par le thread piece.*/
   char def[20];/*vairable pour tester les messages recu*/
   void *messRec; /*message recu par le thread piece*/
