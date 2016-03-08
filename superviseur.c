@@ -160,7 +160,8 @@ void * th_piece(void * param_data)
   Data *p_data = (Data*)param_data;
   /*int piece = p_data->piece;*/
   int machine = p_data->machine;
-  
+ 
+	printf("piece %lX : demande mutex machine %d\n", (long) pthread_self(), machine + 1);
   if(pthread_mutex_lock(&mutexMachine[machine])!=0)
   {
     erreur("piece : erreur de verouillage du mutex machine   ",96);
