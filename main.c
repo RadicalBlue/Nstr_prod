@@ -92,10 +92,16 @@ void initialisation_mutex()
 void initialisation_mq()
 {
 	int i;
-  	messageQueueRobotAl = mq_open("/messageQueueRobotAl",O_CREAT | O_RDWR,0666,NULL);
+	struct mq_attr attr;  
+	attr.mq_flags = 0;  
+	attr.mq_maxmsg = 10;  
+	attr.mq_msgsize = 33;  
+	attr.mq_curmsgs = 0;
+	
+  	messageQueueRobotAl = mq_open("/messageQueueRobotAl",O_CREAT | O_RDWR,0666,&attr);
 	if (messageQueueRobotAl == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec le robot alimentation\n", 8);
-	messageQueueRobotRe = mq_open("/messageQueueRobotRe",O_CREAT | O_RDWR,0666,NULL);
+	messageQueueRobotRe = mq_open("/messageQueueRobotRe",O_CREAT | O_RDWR,0666,&attr);
 	if (messageQueueRobotRe == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec le robot retrait\n", 9);
 	
@@ -103,7 +109,7 @@ void initialisation_mq()
 	{
 		char nomQ[15];
 		sprintf(nomQ,"/QueueMachine%d",i);
-		messageQueueMachine[i] = mq_open(nomQ,O_CREAT | O_RDWR,0666,NULL);
+		messageQueueMachine[i] = mq_open(nomQ,O_CREAT | O_RDWR,0666,&attr);
 		if (messageQueueMachine[i] == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec les machine\n", 10);
 	}
