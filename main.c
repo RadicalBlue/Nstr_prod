@@ -63,21 +63,21 @@ int main()
 void initialisation_thread()
 {
 	int i;
-	if (pthread_create(&thIdDialog, NULL, th_Dialogue, NULL))
-		erreur("Impossible de lancer le thread thIdDialog\n", 1);
-
 
 	for (i = 0; i < NB_MACHINE; i++)
 		if (pthread_create(&machine[i], NULL, th_Machine, NULL))
 			erreur("impossible de lancer un thread machine\n", 2);
-
 
 	if (pthread_create(&robot_alim, NULL, th_Robot_alimentation, NULL))
 		erreur("impossible de lancer le thread robot alimentation\n", 3);
 
 	if (pthread_create(&robot_retr, NULL, th_Robot_retrait, NULL))
 		erreur("impossible de lancer le thread robot retrait\n", 4);
+	
+	if (pthread_create(&thIdDialog, NULL, th_Dialogue, NULL))
+		erreur("Impossible de lancer le thread thIdDialog\n", 1);
 }
+
 void initialisation_mutex()
 {
   	int i;
