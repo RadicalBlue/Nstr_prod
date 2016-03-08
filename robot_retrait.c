@@ -60,7 +60,7 @@ void * th_Robot_retrait()
 	not.sigev_notify_attributes = NULL;
 	not.sigev_value.sival_ptr = &messageQueueRobotRe;   /* Arg. to thread func. */
 	if (mq_notify(messageQueueRobotRe, &not) == -1) {
-		perror("robot_retr : mq_notify");
+		perror("Robot_retr : mq_notify");
 		exit(EXIT_FAILURE);
 	}
 
@@ -84,9 +84,9 @@ void retirer_pc_usn()
 
 void retirer_piece_usinee_du_convoyeur()
 {
-	printf("retrait de la piece usinee\n");
+	printf("Robot retrait : retrait de la piece usinee\n");
 	sleep(TEMPSRETRAIT);
-	printf("Piece usinee retiree\n");
+	printf("Robot retrait : Piece usinee retiree\n");
 }
 
 //void fnc_evenementielle_timerRR()
@@ -108,21 +108,21 @@ static void receive_sig(union sigval sv)
 
 
 	if (mq_getattr(mqdes, &attr) == -1) {
-		perror("mq_getattr");
+		perror("Robot_retr : mq_getattr");
 		exit(EXIT_FAILURE);
 	}
 	buf = malloc(attr.mq_msgsize);
 
 
 	if (buf == NULL) {
-		perror("malloc");
+		perror("Robot_retr : malloc");
 		exit(EXIT_FAILURE);
 	}
 
 
 	nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
 	if (nr == -1) {
-		perror("mq_receive");
+		perror("Robot_retr : mq_receive");
 		exit(EXIT_FAILURE);
 	}
 
