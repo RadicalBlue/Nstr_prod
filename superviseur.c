@@ -157,9 +157,9 @@ void * th_piece(void * param_data)
   struct   timespec timer;
   clock_gettime(CLOCK_REALTIME, &timer); /*initialisation du timer*/
   size_t sizeMessage = 20;
-  Data *p_data = (Data*)param_data;
+  /*Data *p_data = (Data*)param_data;*/
   /*int piece = p_data->piece;*/
-  int machine = p_data->machine;
+  int machine = ((Data*)param_data)->machine;
  
 	printf("piece %lX : demande mutex machine %d\n", (long) pthread_self(), machine + 1);
   if(pthread_mutex_lock(&mutexMachine[machine])!=0)
@@ -335,7 +335,8 @@ pthread_t creer_thread(int code_piece,int numero_machine)
   Data param;
   param.piece = code_piece;
   param.machine = numero_machine;
-  
+  printf("code piece %d, numero machine %d \n",code_piece,numero_machine);
+  printf("code piece dans le param %d, numero machine dans le param %d \n",param.piece,param.machine);
   if(pthread_create(&new_thread,NULL,th_piece,&param) != 0)
   {
     erreur("erreur creation de thread  ", 95);
