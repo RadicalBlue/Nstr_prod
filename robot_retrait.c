@@ -38,6 +38,7 @@ static void receive_sig(union sigval sv);
 
 void * th_Robot_retrait()
 {
+	printf("Robot retrait : start\n");
 	//struct sigaction act;
 
 	//memset (&act, '\0', sizeof(act));

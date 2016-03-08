@@ -38,6 +38,7 @@ static void receive_sig(union sigval sv);
 
 void * th_Robot_alimentation()
 {
+	printf("Robot alimentation : start\n");
 	//struct sigaction act;
 
 	//memset (&act, '\0', sizeof(act));

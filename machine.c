@@ -54,6 +54,8 @@ void * th_Machine()
 	while (machine[i_th] != moi)
 		i_th++;
 
+	printf("machine %d : start\n", i_th + 1);
+
 	//struct sigaction act;
 
 	//memset (&act, '\0', sizeof(act));
