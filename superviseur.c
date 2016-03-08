@@ -135,6 +135,7 @@ void * th_Dialogue()
       pthread_t new_thread = creer_thread(code_piece,numero_machine);
       addInList(listeThreadPiece,new_thread);
     }
+    sleep(10);
   }
 }
 /************************************************************/
