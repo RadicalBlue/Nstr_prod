@@ -76,7 +76,7 @@ void * th_Machine()
 	not.sigev_notify_attributes = NULL;
 	not.sigev_value.sival_ptr = &messageQueueMachine[i_th];
 	if (mq_notify(messageQueueMachine[i_th], &not) == -1) {
-		perror("mq_notify");
+		perror("machine : mq_notify");
 		exit(EXIT_FAILURE);
 	}
 

@@ -59,7 +59,7 @@ void * th_Robot_alimentation()
 	not.sigev_notify_attributes = NULL;
 	not.sigev_value.sival_ptr = &messageQueueRobotAl;
 	if (mq_notify(messageQueueRobotAl, &not) == -1) {
-		perror("mq_notify");
+		perror("robot_al : mq_notify");
 		exit(EXIT_FAILURE);
 	}
 	

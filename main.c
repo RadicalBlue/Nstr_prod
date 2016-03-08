@@ -38,6 +38,7 @@ void initialisation();
 int main()
 {
 	int i;
+	printf("initialisation\n");
 	initialisation();
 	listeThreadPiece = creatList();
 	

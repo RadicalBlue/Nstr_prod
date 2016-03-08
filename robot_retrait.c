@@ -59,7 +59,7 @@ void * th_Robot_retrait()
 	not.sigev_notify_attributes = NULL;
 	not.sigev_value.sival_ptr = &messageQueueRobotRe;   /* Arg. to thread func. */
 	if (mq_notify(messageQueueRobotRe, &not) == -1) {
-		perror("mq_notify");
+		perror("robot_retr : mq_notify");
 		exit(EXIT_FAILURE);
 	}
 
