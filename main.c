@@ -9,9 +9,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <fcntl.h>
+
 
 #define NB_MACHINE 3
 
@@ -33,13 +36,18 @@ mqd_t messageQueueMachine[NB_MACHINE]; /*identifiant de la file de message utili
 Liste listeThreadPiece;
 /* Fonction qui lance tous les threads necessaire au bon fonctionnement du code
  */
-void initialisation();
+void initialisation_mq();
+void initialisation_mutex();
+void initialisation_thread();
+void destruction();
 
 int main()
 {
 	int i;
 	printf("initialisation\n");
-	initialisation();
+	initialisation_mq();
+	initialisation_mutex();
+	initialisation_thread();
 	listeThreadPiece = creatList();
 	
 	
@@ -52,7 +60,7 @@ int main()
 	return 0;
 }
 
-void initialisation()
+void initialisation_thread()
 {
 	int i;
 	if (pthread_create(&thIdDialog, NULL, th_Dialogue, NULL))
@@ -69,17 +77,25 @@ void initialisation()
 
 	if (pthread_create(&robot_retr, NULL, th_Robot_retrait, NULL))
 		erreur("impossible de lancer le thread robot retrait\n", 4);
-	if(pthread_mutex_init(&mutexConvoyeur,NULL))
+}
+void initialisation_mutex()
+{
+  	int i;
+  	if(pthread_mutex_init(&mutexConvoyeur,NULL))
 		erreur("erreur d'initialisation du mutex convoyeur\n", 5);
 	for (i = 0; i < NB_MACHINE; i++)
 		if (pthread_mutex_init(&mutexMachine[i], NULL))
 			erreur("erreur d'initialisation du mutex de la machine\n", 6);
 	if(pthread_mutex_init(&mutexEtat,NULL))
 		erreur("erreur d'initialisation du mutex de etat\n", 7);
-	messageQueueRobotAl = mq_open("messageQueueRobotAl", O_RDWR);
+}
+void initialisation_mq()
+{
+	int i;
+  	messageQueueRobotAl = mq_open("messageQueueRobotAl",O_CREAT | O_RDWR);
 	if (messageQueueRobotAl == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec le robot alimentation\n", 8);
-	messageQueueRobotRe = mq_open("messageQueueRobotRe", O_RDWR);
+	messageQueueRobotRe = mq_open("messageQueueRobotRe",O_CREAT | O_RDWR);
 	if (messageQueueRobotRe == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec le robot retrait\n", 9);
 	
@@ -87,12 +103,11 @@ void initialisation()
 	{
 		char nomQ[14];
 		sprintf(nomQ,"QueueMachine%d",i);
-		messageQueueMachine[i] = mq_open(nomQ, O_RDWR);
+		messageQueueMachine[i] = mq_open(nomQ,O_CREAT | O_RDWR);
 		if (messageQueueMachine[i] == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec les machine\n", 10);
 	}
 }
-
 void destruction()
 {
 	int i;
