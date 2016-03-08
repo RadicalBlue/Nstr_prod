@@ -225,7 +225,7 @@ void * th_piece(void * param_data)
   {
     erreur("erreur de reception de message (messageQueueRobotAl) : ",94);
   }
-  printf("j'ai recu la confirmation de fin d'usinage par la machine%d"numero_machine);
+  printf("j'ai recu la confirmation de fin d'usinage par la machine%d",numero_machine);
    if(messRec == NULL)
   {
     pthread_mutex_lock(&mutexEtat);
