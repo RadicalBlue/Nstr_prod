@@ -92,17 +92,17 @@ void initialisation_mutex()
 void initialisation_mq()
 {
 	int i;
-  	messageQueueRobotAl = mq_open("messageQueueRobotAl",O_CREAT | O_RDWR,0666,NULL);
+  	messageQueueRobotAl = mq_open("/messageQueueRobotAl",O_CREAT | O_RDWR,0666,NULL);
 	if (messageQueueRobotAl == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec le robot alimentation\n", 8);
-	messageQueueRobotRe = mq_open("messageQueueRobotRe",O_CREAT | O_RDWR,0666,NULL);
+	messageQueueRobotRe = mq_open("/messageQueueRobotRe",O_CREAT | O_RDWR,0666,NULL);
 	if (messageQueueRobotRe == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec le robot retrait\n", 9);
 	
 	for (i = 0; i < NB_MACHINE; i++)
 	{
-		char nomQ[14];
-		sprintf(nomQ,"QueueMachine%d",i);
+		char nomQ[15];
+		sprintf(nomQ,"/QueueMachine%d",i);
 		messageQueueMachine[i] = mq_open(nomQ,O_CREAT | O_RDWR,0666,NULL);
 		if (messageQueueMachine[i] == (mqd_t) -1)
 		erreur("erreur d'initialisation de la file de message avec les machine\n", 10);
@@ -113,14 +113,14 @@ void destruction()
 	int i;
 	for (i = 0; i < NB_MACHINE; i++)
 	{
-		char nomQ[14];
-		sprintf(nomQ,"QueueMachine%d",i);
+		char nomQ[15];
+		sprintf(nomQ,"/QueueMachine%d",i);
 		if (mq_unlink(nomQ) == -1)
 		erreur("erreur de suppression de la file de message avec les machine\n", 11);
 	}
-	if (mq_unlink("messageQueueRobotAl") == -1)
+	if (mq_unlink("/messageQueueRobotAl") == -1)
 		erreur("erreur de suppression de la file de message avec les machine\n", 12);
-	if (mq_unlink("messageQueueRobotAl") == -1)
+	if (mq_unlink("/messageQueueRobotAl") == -1)
 		erreur("erreur de suppression de la file de message avec les machine\n", 13);
 	if(pthread_mutex_destroy(&mutexConvoyeur))
 		  erreur("erreur de destruction du mutex convoyeur",14);
