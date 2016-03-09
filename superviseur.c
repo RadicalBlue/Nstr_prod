@@ -157,11 +157,11 @@ void * th_piece(void * param_data)
   struct   timespec timer;
   clock_gettime(CLOCK_REALTIME, &timer); /*initialisation du timer*/
   size_t sizeMessage = 20;
-  /*Data *p_data = (Data*)param_data;*/
-  /*int piece = p_data->piece;*/
-  int machine = ((Data*)param_data)->machine;
+  struct s_mydata * p_data = (Data*) param_data;
+  int piece = p_data->piece;
+  int machine = p_data->machine;
  
-	printf("piece %lX : demande mutex machine %d\n", (long) pthread_self(), machine + 1);
+	printf("piece %lX : demande mutex machine %d / piece %d\n", (long) pthread_self(), machine, piece);
   if(pthread_mutex_lock(&mutexMachine[machine])!=0)
   {
     erreur("piece : erreur de verouillage du mutex machine   ",96);
@@ -332,12 +332,12 @@ int correspondance_machine_code(int code_piece)
 pthread_t creer_thread(int code_piece,int numero_machine)
 {
   pthread_t new_thread;
-  Data param;
-  param.piece = code_piece;
-  param.machine = numero_machine;
+  Data * param = (Data *) malloc(sizeof(struct s_mydata));;
+  param->piece = code_piece;
+  param->machine = numero_machine;
   printf("code piece %d, numero machine %d \n",code_piece,numero_machine);
-  printf("code piece dans le param %d, numero machine dans le param %d \n",param.piece,param.machine);
-  if(pthread_create(&new_thread,NULL,th_piece,&param) != 0)
+  printf("code piece dans le param %d, numero machine dans le param %d \n",param->piece,param->machine);
+  if(pthread_create(&new_thread, NULL, &th_piece, (void *) param) != 0)
   {
     erreur("erreur creation de thread  ", 95);
   }
