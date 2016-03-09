@@ -37,6 +37,8 @@ Liste addInList(Liste l, pthread_t element)
 
 Liste removeFirst(Liste l)
 {
+  if(isEmpty(l)|| l == NULL)
+    erreur("La liste est vide ! on ne peut pas faire de removeFirst ",75);
   Liste temp = l;
   l = l->next;
   free(temp);
@@ -52,6 +54,8 @@ void destroyList(Liste l)
 
 pthread_t pullElement(Liste l)
 {
+  if(isEmpty(l)|| l == NULL)
+    erreur("La liste est vide ! on ne peut pas faire de pull",77);
   return l->data;
 }
 
@@ -86,7 +90,7 @@ void mapList(Liste l)
 {
   while(!isEmpty(l))
   {
-    printf("%ld\n",(unsigned long)l->data);
+    printf("%lX\n",(unsigned long)l->data);
     l = l->next;    
   }  
 }

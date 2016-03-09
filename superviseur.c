@@ -48,10 +48,13 @@ typedef struct s_mydata{
  */
 void fnc_evenementielle_USER1(int s)
 {
+  printf("signal SIGUSR1 a ete recu\n");
+  mapList(listeThreadPiece);
   while(!isEmpty(listeThreadPiece))
   {
     pthread_t th = pullElement(listeThreadPiece);
     listeThreadPiece = removeFirst(listeThreadPiece);
+    printf("envoi du signal kill au thread %lX\n",(long)th);
     pthread_kill(th,SIGKILL);
   }
   erreur("Fin anormale du system\n", 90);
@@ -64,6 +67,7 @@ void fnc_evenementielle_USER1(int s)
  */
 void fnc_evenementielle_USER2(int s)
 {
+  printf("signal SIGUSR1 a ete recu\n");
   listeThreadPiece = removeFromList(listeThreadPiece,threadID);
 }
 /*******************************************************************************************/
@@ -80,6 +84,7 @@ void * th_Dialogue()
 {
 	printf("dialogue : start\n");
   int i;
+  listeThreadPiece = creatList();
   /*initialisation des mutex*/
   for(i = 0 ; i < NBRMACHINE; i++)
   {
@@ -186,12 +191,14 @@ void * th_piece(void * param_data)
   }
   printf("piece %lX :j'ai recu la confirmation du robot alimentation\n",(long)pthread_self());
   sprintf(def,"defaillance");/*test pour savoir si le message recu est un message de defaillance*/
+ 
   /*si on ne reçois pas de message ou un message de defaillance on envoie le signal USR1 au thread th_Dialogue*/
   if(messRec == NULL || strcmp((char*)messRec,def))
   {
     printf("piece %lX : arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes\n",(long)pthread_self());
-    pthread_kill(SIGUSR1,thIdDialog);
+    pthread_kill(thIdDialog,SIGUSR1);
   }
+  
   /*Sinon le thread reçois fin de depot sur convoyeur*/
   
   sprintf(message,"deposer brute table");
@@ -214,7 +221,7 @@ void * th_piece(void * param_data)
   {
     printf("piece %lX : la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes\n",(long)pthread_self(), numero_machine);
     threadID = pthread_self();
-    pthread_kill(SIGUSR2,thIdDialog);
+    pthread_kill(thIdDialog,SIGUSR2);
   }
   /*sinon le thread recois la fin du de pot piece brute sur table*/
   if(pthread_mutex_unlock(&mutexConvoyeur)!=0) /*liberation du mutex convoyeur*/
@@ -237,7 +244,7 @@ void * th_piece(void * param_data)
     pthread_mutex_unlock(&mutexEtat);
     printf("piece %lX : la machine numero %d n'a pas fini de retirer la pièce du convoyeur après 50 secondes\n",(long)pthread_self(), numero_machine);
     threadID = pthread_self();
-    pthread_kill(SIGUSR2,thIdDialog);
+    pthread_kill(thIdDialog,SIGUSR2);
   }
   /*sinon il recois fin usinage*/
   pthread_mutex_lock(&mutexConvoyeur);
@@ -260,7 +267,7 @@ void * th_piece(void * param_data)
   if(messRec == NULL)
   {
     printf("piece %lX : la machine numero %d n'a pas depose la pièce usine sur le convoyeur après 30 secondes\n",(long)pthread_self(), numero_machine);
-    pthread_kill(SIGUSR1,thIdDialog);
+    pthread_kill(thIdDialog,SIGUSR1);
   }
   /*sinon le thread recois fin de depot piece piece usine sur convoyeur*/
   sprintf(message,"retirer usine conv");
@@ -281,12 +288,12 @@ void * th_piece(void * param_data)
   if(messRec == NULL)
   {
     printf("piece %lX : arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes\n",(long)pthread_self());
-    pthread_kill(SIGUSR1,thIdDialog);
+    pthread_kill(thIdDialog,SIGUSR1);
   }
   /*Sinon: le thread recois fin retrait piece usinee du convoyeur*/
   pthread_mutex_unlock(&mutexConvoyeur);
   pthread_mutex_unlock(&mutexMachine[numero_machine]);
-  pthread_kill(SIGUSR2,thIdDialog);
+  pthread_kill(thIdDialog,SIGUSR2);
   printf("piece %lX : Usinage de la piece %d : OK \n",(long)pthread_self(),code_piece);
   pthread_exit(0);
 }

@@ -48,7 +48,7 @@ int main()
 	initialisation_mq();
 	initialisation_mutex();
 	initialisation_thread();
-	listeThreadPiece = creatList();
+	
 	
 	
 	pthread_join(thIdDialog,NULL);
@@ -56,7 +56,7 @@ int main()
 	pthread_join(robot_retr,NULL);
 	for (i = 0; i < NB_MACHINE; i++)
 		  pthread_join(machine[i],NULL);
-	
+	destroyList(listeThreadPiece);
 	return 0;
 }
 
