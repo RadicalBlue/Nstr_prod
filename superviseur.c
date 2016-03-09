@@ -151,7 +151,7 @@ void * th_piece(void * param_data)
 	printf("piece %lX : start\n", (long) pthread_self());
   char message[20]; /* message envoye par le thread piece.*/
   char def[20];/*vairable pour tester les messages recu*/
-  void *messRec; /*message recu par le thread piece*/
+  char messRec[50]; /*message recu par le thread piece*/
   struct mq_attr attr;/*structure permettant de recevoir les attributs du message dans la file*/
   ssize_t bitRecu; /*nombre de bit recu*/
   struct   timespec timer;
@@ -170,16 +170,16 @@ void * th_piece(void * param_data)
   {
     erreur("piece : erreur de verouillage du mutex convoyeur   ",96);
   }
-  sprintf(message,"deposer brute conv");
+  strcpy(message, "deposer brute conv\0");
   printf("piece %lX : j'envoie le message depose la piece brute sur le convoyeur\n",(long)pthread_self());
-  if(mq_send(messageQueueRobotAl,message,sizeMessage,0)!=0)
+  if(mq_send(messageQueueRobotAl,message,strlen(message),0)!=0)
   {
     erreur("envoie du message a la file de message robot al  ",95);
   }
-  messRec=malloc(attr.mq_msgsize+1);
+  //messRec=malloc(attr.mq_msgsize+1);
   printf("piece %lX : j'attends de recevoir la confirmation du robot alimentation\n",(long)pthread_self());
   timer.tv_sec += 20;/* timer se declanchera dans 20 secondes */
-  bitRecu =mq_timedreceive(messageQueueRobotAl,messRec, attr.mq_msgsize, NULL, &timer);
+  bitRecu =mq_timedreceive(messageQueueRobotAl,messRec, 50, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
@@ -200,10 +200,10 @@ void * th_piece(void * param_data)
   {
     erreur("piece : envoie du message a la file de message table  ",95);
   }
-  messRec=malloc(attr.mq_msgsize+1);
+  //messRec=malloc(attr.mq_msgsize+1);
   printf("piece %lX : j'attends de recevoir la confirmation de la machine%d\n",(long)pthread_self(),numero_machine);
   timer.tv_sec += 50;/* timer se declanchera dans 50 secondes */
-  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
+  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
@@ -221,10 +221,10 @@ void * th_piece(void * param_data)
   {
     erreur("piece : erreur de verouillage du mutex convoyeur   ",96);
   }
-  messRec=malloc(attr.mq_msgsize+1);
+  //messRec=malloc(attr.mq_msgsize+1);
   printf("piece %lX : j'attends que la machine%d finisse de travailler\n",(long)pthread_self(),numero_machine);
   timer.tv_sec += 600;/* timer se declanchera dans 10 minutes */
-  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
+  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
@@ -248,10 +248,10 @@ void * th_piece(void * param_data)
   {
     erreur("piece : envoie du message a la file de message table  ",95);
   }
-  messRec=malloc(attr.mq_msgsize+1);
+  //messRec=malloc(attr.mq_msgsize+1);
   printf("piece %lX : j'attends de recevoir la confirmation de depot de la machine%d\n",(long)pthread_self(),numero_machine);
   timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
-  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, attr.mq_msgsize, NULL, &timer);
+  bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
@@ -269,10 +269,10 @@ void * th_piece(void * param_data)
   {
     erreur("piece : envoie du message a la file de message robot retrait  ",95);
   }
-  messRec=malloc(attr.mq_msgsize+1);
+  //messRec=malloc(attr.mq_msgsize+1);
   printf("piece %lX : j'attends de recevoir la confirmation du robot de retrait\n",(long)pthread_self());
   timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
-  bitRecu =mq_timedreceive(messageQueueRobotRe,messRec, attr.mq_msgsize, NULL, &timer);
+  bitRecu =mq_timedreceive(messageQueueRobotRe,messRec, 50, NULL, &timer);
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
