@@ -1,5 +1,5 @@
 CC=gcc
-OPT=-Wall -lpthread -lrt
+OPT=-Wall -lpthread -lrt -ggdb
 All:Product_Auto
 
 Product_Auto : main.c machine.o robot_alimentation.o robot_retrait.o superviseur.o erreur.o liste.o

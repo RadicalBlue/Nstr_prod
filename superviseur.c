@@ -27,7 +27,7 @@ extern mqd_t messageQueueMachine[NBRMACHINE]; /*identifiant de la file de messag
 /***************************************************************************************************************************************************/
 
 bool machineEnPanne[NBRMACHINE] = {false};
-extern Liste listeThreadPiece;
+Liste listeThreadPiece;
 int code_piece, numero_machine;
 bool etat;
 
@@ -49,6 +49,8 @@ typedef struct s_mydata{
 void fnc_evenementielle_USER1(int s)
 {
   printf("signal SIGUSR1 a ete recu\n");
+  if(listeThreadPiece == NULL)
+    printf("listeThreadPiece NULL \n");
   mapList(listeThreadPiece);
   while(!isEmpty(listeThreadPiece))
   {
@@ -85,6 +87,7 @@ void * th_Dialogue()
 	printf("dialogue : start\n");
   int i;
   listeThreadPiece = creatList();
+  
   /*initialisation des mutex*/
   for(i = 0 ; i < NBRMACHINE; i++)
   {
@@ -157,7 +160,7 @@ void * th_piece(void * param_data)
   char message[20]; /* message envoye par le thread piece.*/
   char def[20];/*vairable pour tester les messages recu*/
   char messRec[50]; /*message recu par le thread piece*/
-  struct mq_attr attr;/*structure permettant de recevoir les attributs du message dans la file*/
+  /*struct mq_attr attr;structure permettant de recevoir les attributs du message dans la file*/
   ssize_t bitRecu; /*nombre de bit recu*/
   struct   timespec timer;
   clock_gettime(CLOCK_REALTIME, &timer); /*initialisation du timer*/

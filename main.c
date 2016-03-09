@@ -33,7 +33,7 @@ mqd_t messageQueueRobotAl; /*identifiant de la file de message utilise par les t
 mqd_t messageQueueRobotRe; /*identifiant de la file de message utilise par les threads pieces et le thread robot retrait*/
 mqd_t messageQueueMachine[NB_MACHINE]; /*identifiant de la file de message utilise par les threads pieces et les threads machine*/
 
-Liste listeThreadPiece;
+/*Liste listeThreadPiece;*/
 /* Fonction qui lance tous les threads necessaire au bon fonctionnement du code
  */
 void initialisation_mq();
@@ -56,7 +56,7 @@ int main()
 	pthread_join(robot_retr,NULL);
 	for (i = 0; i < NB_MACHINE; i++)
 		  pthread_join(machine[i],NULL);
-	destroyList(listeThreadPiece);
+	/*destroyList(listeThreadPiece);*/
 	return 0;
 }
 

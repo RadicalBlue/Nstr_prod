@@ -88,6 +88,8 @@ Liste removeFromList(Liste l, pthread_t element)
 
 void mapList(Liste l)
 {
+  if(isEmpty(l)|| l == NULL)
+    erreur("La liste est vide ! on ne peut pas faire de map ",75);
   while(!isEmpty(l))
   {
     printf("%lX\n",(unsigned long)l->data);
