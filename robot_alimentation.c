@@ -112,12 +112,10 @@ static void receive_sig(union sigval sv)
 	}
 	buf = malloc(attr.mq_msgsize);
 
-
 	if (buf == NULL) {
 		perror("Robot_al : malloc");
 		exit(EXIT_FAILURE);
 	}
-
 
 	nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
 	if (nr == -1) {
