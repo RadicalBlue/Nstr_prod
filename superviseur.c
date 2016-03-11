@@ -62,7 +62,7 @@ void fnc_evenementielle_USER1(int s)
     
     pthread_kill(th,SIGKILL);
   }
-  
+  destroyList(listeThreadPiece);
   erreur("Fin anormale du system\n", 90);
 }
 /*
@@ -185,7 +185,7 @@ void * th_piece(void * param_data)
   char messRec[50]; /*message recu par le thread piece*/
   /*struct mq_attr attr;structure permettant de recevoir les attributs du message dans la file*/
   ssize_t bitRecu; /*nombre de bit recu*/
-  struct   timespec timer;
+  struct timespec timer;
   clock_gettime(CLOCK_REALTIME, &timer); /*initialisation du timer*/
   size_t sizeMessage = 20;
   struct s_mydata * p_data = (Data*) param_data;
@@ -217,8 +217,8 @@ void * th_piece(void * param_data)
   printf("piece %lX : j'attends de recevoir la confirmation du robot alimentation\n",(long)pthread_self());
   
   timer.tv_sec += 20;/* timer se declanchera dans 20 secondes */
-  
-  bitRecu =mq_timedreceive(messageQueueRobotAl,messRec, 50, NULL, &timer);
+  /*sleep(2);*/
+  bitRecu = mq_timedreceive(messageQueueRobotAl,messRec, 50, NULL, &timer);
   
   if (bitRecu == -1)
   {
@@ -231,7 +231,7 @@ void * th_piece(void * param_data)
  
   /*si on ne reçois pas de message ou un message de defaillance on envoie le signal USR1 au thread th_Dialogue*/
   
-  if(messRec == NULL || strcmp((char*)messRec,def))
+  if(messRec == NULL || strcmp((char*)messRec,def)==0)
   {
     printf("piece %lX : arret du system de supervision : le robot d'alimentation ne répond pas ou n'a pas pu retirer la piece au bout de 20 secondes\n",(long)pthread_self());
     pthread_kill(thIdDialog,SIGUSR1);
