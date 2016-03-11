@@ -39,8 +39,18 @@ int main()
   
   mapList(testList);
   
+  testList = removeFromList(testList, th_test1);
+  
+   if(isEmpty(testList))
+    printf("la liste est bien vide\n");
+   else
+   {
+    printf("erreur liste non vide !\n") ;
+    exit(99);
+  }
+  
   destroyList(testList);
-  printf("destruction de la liste\n");
+  
   /*Fin des test de la liste*/
   return 0;
 }

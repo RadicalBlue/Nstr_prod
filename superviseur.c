@@ -258,7 +258,7 @@ void * th_piece(void * param_data)
   
   if (bitRecu == -1)
   {
-    erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
+    erreur("piece : erreur de reception de message (messageQueueMachine)   ",94);
   }
   
   /*si on ne reçois pas de message on envoie le signal USR2 au thread th_Dialogue*/

@@ -37,7 +37,7 @@ Liste addInList(Liste l, pthread_t element)
 
 Liste removeFirst(Liste l)
 {
-  if(/*isEmpty(l) ||*/ l == NULL)
+  if(isEmpty(l) || l == NULL)
     erreur("La liste est vide ! on ne peut pas faire de removeFirst ",75);
   Liste temp = l;
   l = l->next;
@@ -48,8 +48,20 @@ Liste removeFirst(Liste l)
 
 void destroyList(Liste l)
 {
-  while(l)
-    l = removeFirst(l);
+  printf("destruction de la liste...\n");
+  
+  if(isEmpty(l))
+  {
+    free(l);
+  }
+  
+  else 
+  {
+    while(l)
+      l = removeFirst(l);
+  }
+  
+  printf("liste detruite\n");
 }
 
 pthread_t pullElement(Liste l)
@@ -61,28 +73,45 @@ pthread_t pullElement(Liste l)
 
 Liste removeFromList(Liste l, pthread_t element)
 {
+  
+//   printf("removeFromList\n");
+  
+  if(isEmpty(l)|| l == NULL)
+    erreur("La liste est vide ! on ne peut pas faire de removeFromList ",75);
+  
   Liste temp = l->next;
   
-  while(pthread_equal(temp->data,element)== 0 && temp->data != 0)
-  {
-    temp = temp->next;
+  if(!isEmpty(temp)/*|| temp != NULL*/)
+  { 
+ 
+    while(pthread_equal(temp->data,element)== 0 && temp->data != 0)
+    {
+      temp = temp->next;
+    }
+    
+//     printf("removeFromList : while du temp fin\n");
+    
+    temp = removeFirst(temp); /* effacement de l'élément mis en paramètre*/
+    
+//     printf("removeFromList\n");
+    
+    Liste newlist = creatList();
+    
+    while(pthread_equal(temp->data,element)== 0)
+    {
+      newlist = addInList(newlist,l->data);
+      l = l->next;
+    }
+    
+    while(temp)
+    {
+      newlist = addInList(newlist,temp->data);
+      temp = temp->next;
+    }
+    return newlist;
   }
   
-  temp = removeFirst(temp); /* effacement de l'élément mis en paramètre*/
-  
-  Liste newlist = creatList();
-  
-  while(pthread_equal(temp->data,element)== 0)
-  {
-    newlist = addInList(newlist,l->data);
-    l = l->next;
-  }
-  while(temp)
-  {
-    newlist = addInList(newlist,temp->data);
-    temp = temp->next;
-  }
-  return newlist;
+  return temp;
 }
 
 
