@@ -165,7 +165,7 @@ void * th_Dialogue()
       /*mapList(listeThreadPiece);*/
     }
     
-    sleep(10);
+    sleep(120);
   }
 }
 /************************************************************/
@@ -213,11 +213,12 @@ void * th_piece(void * param_data)
     erreur("envoie du message a la file de message robot al  ",95);
   }
   
-  //messRec=malloc(attr.mq_msgsize+1);
+  sleep(15); /*attente de lecture de la file*/
+  
   printf("piece %lX : j'attends de recevoir la confirmation du robot alimentation\n",(long)pthread_self());
   
-  timer.tv_sec += 20;/* timer se declanchera dans 20 secondes */
-  /*sleep(2);*/
+  timer.tv_sec += 5;/* timer se declanchera dans 20 secondes */
+  
   bitRecu = mq_timedreceive(messageQueueRobotAl,messRec, 50, NULL, &timer);
   
   if (bitRecu == -1)
@@ -247,10 +248,11 @@ void * th_piece(void * param_data)
     erreur("piece : envoie du message a la file de message table  ",95);
   }
   
-  //messRec=malloc(attr.mq_msgsize+1);
+  sleep(40); /*attente de lecture de la file*/
+  
   printf("piece %lX : j'attends de recevoir la confirmation de la machine%d\n",(long)pthread_self(),numero_machine);
   
-  timer.tv_sec += 50;/* timer se declanchera dans 50 secondes */
+  timer.tv_sec += 10;/* timer se declanchera dans 50 secondes */
   
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   
@@ -275,7 +277,6 @@ void * th_piece(void * param_data)
     erreur("piece : erreur de verouillage du mutex convoyeur   ",96);
   }
   
-  //messRec=malloc(attr.mq_msgsize+1);
   printf("piece %lX : j'attends que la machine%d finisse de travailler\n",(long)pthread_self(),numero_machine);
   
   timer.tv_sec += 600;/* timer se declanchera dans 10 minutes */
@@ -311,10 +312,11 @@ void * th_piece(void * param_data)
     erreur("piece : envoie du message a la file de message table  ",95);
   }
   
-  //messRec=malloc(attr.mq_msgsize+1);
+  sleep(20); /*attente de lecture de la file*/
+ 
   printf("piece %lX : j'attends de recevoir la confirmation de depot de la machine%d\n",(long)pthread_self(),numero_machine);
   
-  timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
+  timer.tv_sec += 10;/* timer se declanchera dans 30 secondes */
   
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   
@@ -341,10 +343,11 @@ void * th_piece(void * param_data)
     erreur("piece : envoie du message a la file de message robot retrait  ",95);
   }
   
-  //messRec=malloc(attr.mq_msgsize+1);
+  sleep(20); /*attente de lecture de la file*/
+  
   printf("piece %lX : j'attends de recevoir la confirmation du robot de retrait\n",(long)pthread_self());
   
-  timer.tv_sec += 30;/* timer se declanchera dans 30 secondes */
+  timer.tv_sec += 10;/* timer se declanchera dans 30 secondes */
   
   bitRecu =mq_timedreceive(messageQueueRobotRe,messRec, 50, NULL, &timer);
   
