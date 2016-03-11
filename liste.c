@@ -37,7 +37,7 @@ Liste addInList(Liste l, pthread_t element)
 
 Liste removeFirst(Liste l)
 {
-  if(isEmpty(l)|| l == NULL)
+  if(/*isEmpty(l) ||*/ l == NULL)
     erreur("La liste est vide ! on ne peut pas faire de removeFirst ",75);
   Liste temp = l;
   l = l->next;
@@ -92,7 +92,7 @@ void mapList(Liste l)
     erreur("La liste est vide ! on ne peut pas faire de map ",75);
   while(!isEmpty(l))
   {
-    printf("%lX\n",(unsigned long)l->data);
+    printf("elements de la liste: %lX\n",(unsigned long)l->data);
     l = l->next;    
   }  
 }

@@ -50,14 +50,11 @@ void fnc_evenementielle_USER1(int s)
 {
   printf("signal SIGUSR1 a ete recu\n");
   
-  if(listeThreadPiece == NULL)
-    printf("listeThreadPiece NULL \n");
-  
-  mapList(listeThreadPiece);
-  
   while(!isEmpty(listeThreadPiece))
   {
     pthread_t th = pullElement(listeThreadPiece);
+    
+    /*printf("element enleve %lX\n",(unsigned long)th);*/
     
     listeThreadPiece = removeFirst(listeThreadPiece);
     
@@ -76,7 +73,7 @@ void fnc_evenementielle_USER1(int s)
  */
 void fnc_evenementielle_USER2(int s)
 {
-  printf("signal SIGUSR1 a ete recu\n");
+  printf("signal SIGUSR2 a ete recu\n");
   
   listeThreadPiece = removeFromList(listeThreadPiece,threadID);
 }
@@ -96,6 +93,11 @@ void * th_Dialogue()
   
   int i;
   listeThreadPiece = creatList();
+  
+  /*test*/
+  /*if(isEmpty(listeThreadPiece))
+    printf("liste initialiser et vide\n");*/
+  
   
   /*initialisation des mutex*/
   for(i = 0 ; i < NBRMACHINE; i++)
@@ -124,7 +126,7 @@ void * th_Dialogue()
 
   act2.sa_handler = &fnc_evenementielle_USER2;
 
-  if (sigaction(SIGUSR1, &act2, NULL) < 0)
+  if (sigaction(SIGUSR2, &act2, NULL) < 0)
   {
     erreur("erreur sigaction   ",96);
   }
@@ -159,7 +161,8 @@ void * th_Dialogue()
     {
       pthread_t new_thread = creer_thread(code_piece,numero_machine);
       
-      addInList(listeThreadPiece,new_thread);
+      listeThreadPiece = addInList(listeThreadPiece,new_thread);
+      /*mapList(listeThreadPiece);*/
     }
     
     sleep(10);
@@ -414,7 +417,7 @@ pthread_t creer_thread(int code_piece,int numero_machine)
   param->machine = numero_machine;
   
   printf("code piece %d, numero machine %d \n",code_piece,numero_machine);
-  printf("code piece dans le param %d, numero machine dans le param %d \n",param->piece,param->machine);
+  /*printf("code piece dans le param %d, numero machine dans le param %d \n",param->piece,param->machine);*/
   
   if(pthread_create(&new_thread, NULL, &th_piece, (void *) param) != 0)
   {
