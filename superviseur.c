@@ -17,6 +17,7 @@
 
 /***************************************************************************************************************************************************/
 extern pthread_mutex_t mutexMachine[NBRMACHINE]; /*id du mutex concernant les machines en fonctionnement*/
+extern pthread_mutex_t mutexQueueMachine[NBRMACHINE]; /*id du mutex concernant les fils de message entre les machine et les pieces*/
 extern pthread_mutex_t mutexConvoyeur; /*id du mutex du convoyeur: si il est utilise ou non*/
 extern pthread_mutex_t mutexEtat; /*id du mutex des etat pour assurer que deux threads ne change pas l'etat d'une machine en meme temps*/
 extern pthread_t threadID; /*identifiant du thread ayant envoye le signal SIGUSR2 pour signaler un anomalie lors du traitement d'une piece par une machine*/
@@ -242,25 +243,37 @@ void * th_piece(void * param_data)
   sprintf(message,"deposer brute table");
   
   printf("piece %lX : j'envoie le message depose la piece brute sur la table\n",(long)pthread_self());
-  
+  if(pthread_mutex_lock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+  }
   if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
   {
     erreur("piece : envoie du message a la file de message table  ",95);
   }
-  
+  if(pthread_mutex_unlock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+  }
   sleep(40); /*attente de lecture de la file*/
   
   printf("piece %lX : j'attends de recevoir la confirmation de la machine%d\n",(long)pthread_self(),numero_machine);
   
   timer.tv_sec += 10;/* timer se declanchera dans 50 secondes */
-  
+  if(pthread_mutex_lock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de verouillage de la fil de massage machine   ",90);
+  }
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueMachine)   ",94);
   }
-  
+  if(pthread_mutex_unlock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+  }
   /*si on ne reçois pas de message on envoie le signal USR2 au thread th_Dialogue*/
   printf("piece %lX : j'ai recu la confirmation de la machine%d\n",(long)pthread_self(),numero_machine);
   
@@ -274,20 +287,26 @@ void * th_piece(void * param_data)
   /*sinon le thread recois la fin du de pot piece brute sur table*/
   if(pthread_mutex_unlock(&mutexConvoyeur)!=0) /*liberation du mutex convoyeur*/
   {
-    erreur("piece : erreur de verouillage du mutex convoyeur   ",96);
+    erreur("piece : erreur de déverouillage du mutex convoyeur   ",96);
   }
   
   printf("piece %lX : j'attends que la machine%d finisse de travailler\n",(long)pthread_self(),numero_machine);
   
   timer.tv_sec += 600;/* timer se declanchera dans 10 minutes */
-  
+  if(pthread_mutex_lock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+  }
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
   
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);
   }
-  
+  if(pthread_mutex_unlock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+  }
   printf("piece %lX : j'ai recu la confirmation de fin d'usinage par la machine%d\n",(long)pthread_self(),numero_machine);
   
   if(messRec == NULL)
@@ -306,20 +325,32 @@ void * th_piece(void * param_data)
   sprintf(message,"deposer usine conv");
   
   printf("piece %lX : j'envoie le message depose la piece usinee sur le convoyeur\n",(long)pthread_self());
-  
+  if(pthread_mutex_lock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+  }
   if(mq_send(messageQueueMachine[numero_machine],message,sizeMessage,0)!=0)
   {
     erreur("piece : envoie du message a la file de message table  ",95);
   }
-  
+  if(pthread_mutex_unlock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+  }
   sleep(20); /*attente de lecture de la file*/
  
   printf("piece %lX : j'attends de recevoir la confirmation de depot de la machine%d\n",(long)pthread_self(),numero_machine);
   
   timer.tv_sec += 10;/* timer se declanchera dans 30 secondes */
-  
+  if(pthread_mutex_lock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+  }
   bitRecu =mq_timedreceive(messageQueueMachine[numero_machine],messRec, 50, NULL, &timer);
-  
+  if(pthread_mutex_unlock(&mutexQueueMachine[numero_machine])!=0)
+  {
+    erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+  }
   if (bitRecu == -1)
   {
     erreur("piece : erreur de reception de message (messageQueueRobotAl)   ",94);

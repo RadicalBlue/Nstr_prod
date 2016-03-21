@@ -27,7 +27,7 @@ pthread_t threadID; /*identifiant du thread ayant envoye le signal SIGUSR2 pour 
 pthread_mutex_t mutexMachine[NB_MACHINE]; /*id du mutex concernant les machines en fonctionnement*/
 pthread_mutex_t mutexConvoyeur; /*id du mutex du convoyeur: si il est utilise ou non*/
 pthread_mutex_t mutexEtat; /*id du mutex des etat pour assurer que deux threads ne change pas l'etat d'une machine en meme temps*/
-
+pthread_mutex_t mutexQueueMachine[NB_MACHINE]; /*id du mutex concernant les fils de message entre les machine et les pieces*/
 
 mqd_t messageQueueRobotAl; /*identifiant de la file de message utilise par les threads pieces et le thread robot alimentation*/
 mqd_t messageQueueRobotRe; /*identifiant de la file de message utilise par les threads pieces et le thread robot retrait*/
@@ -57,6 +57,7 @@ int main()
 	for (i = 0; i < NB_MACHINE; i++)
 		  pthread_join(machine[i],NULL);
 	/*destroyList(listeThreadPiece);*/
+	destruction();
 	return 0;
 }
 
@@ -73,7 +74,7 @@ void initialisation_thread()
 
 	if (pthread_create(&robot_retr, NULL, th_Robot_retrait, NULL))
 		erreur("impossible de lancer le thread robot retrait\n", 4);
-	
+// 	sleep(1);
 	if (pthread_create(&thIdDialog, NULL, th_Dialogue, NULL))
 		erreur("Impossible de lancer le thread thIdDialog\n", 1);
 }
@@ -84,8 +85,12 @@ void initialisation_mutex()
   	if(pthread_mutex_init(&mutexConvoyeur,NULL))
 		erreur("erreur d'initialisation du mutex convoyeur\n", 5);
 	for (i = 0; i < NB_MACHINE; i++)
+	{
 		if (pthread_mutex_init(&mutexMachine[i], NULL))
 			erreur("erreur d'initialisation du mutex de la machine\n", 6);
+		if (pthread_mutex_init(&mutexQueueMachine[i], NULL))
+			erreur("erreur d'initialisation du mutex de la machine\n", 6);
+	}
 	if(pthread_mutex_init(&mutexEtat,NULL))
 		erreur("erreur d'initialisation du mutex de etat\n", 7);
 }

@@ -12,6 +12,7 @@
 //pid_t sender;
 extern pthread_t machine[4];
 extern mqd_t messageQueueMachine[NBRMACHINE];
+extern pthread_mutex_t mutexQueueMachine[NBRMACHINE]; /*id du mutex concernant les fils de message entre les machine et les pieces*/
 
 int i_th;
 
@@ -47,6 +48,7 @@ void retirer_piece_du_convoyeur();
 
 void * th_Machine()
 {
+	
 	pthread_t moi = pthread_self();
 
 	i_th = 0;
@@ -70,16 +72,26 @@ void * th_Machine()
 	//	erreur("sigaction1 machine", 1);
 	//if (sigaction(SIGUSR2, &act, NULL) < 0)
 	//	erreur("sigaction2 machine", 1);
+	char nomM[30];
+	sprintf(nomM,"machine%d : mq_notify",i_th);
 	
 	struct sigevent not;
-
+	
+	if(pthread_mutex_lock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+	}
 	not.sigev_notify = SIGEV_THREAD;
 	not.sigev_notify_function = receive_sig;
 	not.sigev_notify_attributes = NULL;
 	not.sigev_value.sival_ptr = &messageQueueMachine[i_th];
 	if (mq_notify(messageQueueMachine[i_th], &not) == -1) {
-		perror("machine : mq_notify");
+		perror(nomM);
 		exit(EXIT_FAILURE);
+	}
+	if(pthread_mutex_unlock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de verouillage de la fil de massage machine   ",90);
 	}
 
 	while (1);
@@ -91,10 +103,26 @@ void usinage_pc()
 	char * finUsn = "fin usinage piece\0";
 	retirer_piece_du_convoyeur();
 	//kill(sender, PIECEBRUT);
+	if(pthread_mutex_lock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+	}
 	mq_send(messageQueueMachine[i_th], depotUsnTbl, strlen(depotUsnTbl), (unsigned int) 0);
+	if(pthread_mutex_unlock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+	}
 	usinage();
 	//kill(sender, FINUSINAGE);
+	if(pthread_mutex_lock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+	}
 	mq_send(messageQueueMachine[i_th], finUsn, strlen(finUsn), (unsigned int) 0);
+	if(pthread_mutex_unlock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+	}
 }
 
 void usinage()
@@ -116,7 +144,15 @@ void depot()
 	char * msg = "depose usine conv\0";
 	deposer_piece();
 	//kill(sender, PIECEUSINEE);
+	if(pthread_mutex_lock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+	}
 	mq_send(messageQueueMachine[i_th], msg, strlen(msg), (unsigned int) 0);
+	if(pthread_mutex_unlock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de déverouillage de la fil de massage machine   ",90);
+	}
 }
 
 void deposer_piece()
@@ -145,13 +181,22 @@ static void receive_sig(union sigval sv)
 		perror("machine : malloc");
 		exit(EXIT_FAILURE);
 	}
+	
+	if(pthread_mutex_lock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de verouillage de la fil de massage machine   ",91);
+	}
 
 	nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
 	if (nr == -1) {
 		perror("machine : mq_receive");
 		exit(EXIT_FAILURE);
 	}
-
+	
+	if(pthread_mutex_unlock(&mutexQueueMachine[i_th])!=0)
+	{
+	  erreur("piece : erreur de déverouillage du mutex de la fil de massage machine   ",90);
+	}
 	msg = (char *) buf;
 
 	
