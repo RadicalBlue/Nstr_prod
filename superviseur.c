@@ -136,7 +136,7 @@ void * th_Dialogue()
   
   while(1)
   {
-    code_piece = saisir_ordre_operateur();
+    code_piece = saisir_ordre_operateur();    
     
     numero_machine = correspondance_machine_code(code_piece);
     
